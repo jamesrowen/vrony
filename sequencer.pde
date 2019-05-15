@@ -12,7 +12,7 @@ class Keyframe {
 
 HashMap<String, ArrayList<Keyframe>> sequenceParams = new HashMap<String, ArrayList<Keyframe>>();
 
-void setupSequence() {
+void setupSequencer() {
   sequenceParams.put("speed", new ArrayList<Keyframe>());
   sequenceParams.get("speed").add(new Keyframe(0, .2));
   sequenceParams.get("speed").add(new Keyframe(3, .7));
@@ -24,18 +24,18 @@ void setupSequence() {
 }
 
 void tickSequence(float tick) {
-  s.set("sequencePosition", s.get("sequencePosition") + tick);
+  setSetting("sequencePosition", getSetting("sequencePosition") + tick);
   // go through each setting and calculate the current value
   for (Map.Entry<String, ArrayList<Keyframe>> setting : sequenceParams.entrySet()) {
     int index = 0;
-    while (index < setting.getValue().size() && setting.getValue().get(index).time < s.get("sequencePosition")) {
+    while (index < setting.getValue().size() && setting.getValue().get(index).time < getSetting("sequencePosition")) {
       index++;
     }
     if (index < setting.getValue().size()) {
       Keyframe curr = setting.getValue().get(index);
       Keyframe prev = setting.getValue().get(index - 1);
-      float x = (s.get("sequencePosition") - prev.time) / (curr.time - prev.time);
-      s.set(setting.getKey(), lerp(prev.value, curr.value, x));
+      float x = (getSetting("sequencePosition") - prev.time) / (curr.time - prev.time);
+      setSetting(setting.getKey(), lerp(prev.value, curr.value, x));
     }
   }
 }

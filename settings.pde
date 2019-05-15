@@ -1,46 +1,70 @@
-FloatDict s = new FloatDict();
-IntDict si = new IntDict();
-
-void setupSettings() {
-  s.set("speed", .2);
-  s.set("pointOpacity", 0);
-  s.set("borderOpacity", 1);
-  s.set("numRings", 16);
-  s.set("ringSize", 40.9);
-  s.set("ringSpokes", 24);
-  s.set("ringTwist", 0);
-  
-  // concentric mode
-  s.set("perturbAmount", 20);
-  s.set("perturbSpeed", 5);
-  s.set("perturbWrap", 5);
-  
-  // gear mode
-  s.set("wheelSize", 250);
-  s.set("wheelSpokes", 10);
-  s.set("wheelSpeed", 1);
-  s.set("lissajousX", 1);
-  s.set("lissajousY", 1);
-  
-  //sequencer
-  s.set("sequencePosition", 0);
-  
-  // integer settings (cyclical)
-  si.set("mode", 1);
-  si.set("colorMode", 1);
-  si.set("palette", 0);
-  si.set("numColors", 3);
-  si.set("alternate", 1);
-  si.set("play", 1);
-  // sequencer
-  si.set("sequencer", 1);
-  si.set("sequencePlay", 0);
-}
-
 class Setting {
-  String name;
   int type;
+  float value;
   float minVal;
   float maxVal;
   float defaultVal;
+  boolean sequenced;
+  
+  Setting(int t, float min, float max, float d, boolean s) {
+    type = t;
+    minVal = min;
+    maxVal = max;
+    value = defaultVal = d;
+    sequenced = s;
+  }
+  
+  void advance() {
+    if (type == 0) {
+      println("cannot advance float-type setting");
+    }
+    else {
+      value = (int)(value + 1) % (int)(maxVal + 1);
+    }
+  }
+}
+
+HashMap<String, Setting> settings = new HashMap<String, Setting>();
+
+void setupSettings() {
+  settings.put("speed", new Setting(0, 0, 1, .2, true));
+  settings.put("pointOpacity", new Setting(0, 0, 1, 0, true));
+  settings.put("borderOpacity", new Setting(0, 0, 1, 1, true));
+  settings.put("numRings", new Setting(0, 2, 30, 16, true));
+  settings.put("ringSize", new Setting(0, 1, 80, 40.9, true));
+  settings.put("ringSpokes", new Setting(0, 3, 40, 24, true));
+  settings.put("ringTwist", new Setting(0, 0, .2, 0, true));
+  
+  // concentric mode
+  settings.put("perturbAmount", new Setting(0, 0, 100, 20, true));
+  settings.put("perturbSpeed", new Setting(0, 2, 40, 5, true));
+  settings.put("perturbWrap", new Setting(0, 0, 100, 5, true));
+  
+  // gear mode
+  settings.put("wheelSize", new Setting(0, 100, 400, 250, true));
+  settings.put("wheelSpokes", new Setting(0, 1, 40, 10, true));
+  settings.put("wheelSpeed", new Setting(0, 0, 10, 1, true));
+  settings.put("lissajousX", new Setting(0, 1, 4, 1, true));
+  settings.put("lissajousY", new Setting(0, 1, 4, 1, true));
+  
+  //sequencer
+  settings.put("sequencePosition", new Setting(0, 0, 100000, 0, true));
+  
+  settings.put("mode", new Setting(1, 0, 1, 1, true));
+  settings.put("colorMode", new Setting(1, 0, 2, 1, true));
+  settings.put("palette", new Setting(1, 0, 2, 0, true));
+  settings.put("numColors", new Setting(1, 0, 4, 3, true));
+  settings.put("alternate", new Setting(1, 0, 1, 1, true));
+  settings.put("play", new Setting(1, 0, 1, 1, false));
+  // sequencer
+  settings.put("sequencer", new Setting(1, 0, 1, 1, false));
+  settings.put("sequencePlay", new Setting(1, 0, 1, 0, false));
+}
+
+float getSetting(String name) {
+  return settings.get(name).value;
+}
+
+void setSetting(String name, float val) {
+  settings.get(name).value = val;
 }

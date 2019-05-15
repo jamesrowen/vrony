@@ -1,15 +1,15 @@
 void keyPressed() {
   // space
   if (keyCode == 32) {
-    si.set("play", (si.get("play") + 1) % 2);
+    settings.get("play").advance();
   }
   // C
   if (keyCode == 67) {
-    si.set("colorMode", (si.get("colorMode") + 1) % 3);
+    settings.get("colorMode").advance();
   }
   // P
   if (keyCode == 80) {
-    si.set("palette", (si.get("palette") + 1) % 3);
+    settings.get("palette").advance();
   }
   // S
   if (keyCode == 83) {
@@ -17,6 +17,6 @@ void keyPressed() {
   }
   // M
   if (keyCode == 77) {
-    si.set("mode", (si.get("mode") + 1) % 2);
+    settings.get("mode").advance();
   }
 }
