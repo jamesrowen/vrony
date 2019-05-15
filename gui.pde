@@ -30,6 +30,9 @@ void setupUI() {
   uiComponents.add(new Button("colorMode", 3, uiXOff, by + 25));
   uiComponents.add(new Button("palette", 3, uiXOff + bSpacing, by + 25));
   uiComponents.add(new Button("numColors", 5, uiXOff + bSpacing * 2, by + 25));
+  // sequencer
+  int seqX = 400;
+  uiComponents.add(new Button("sequencePlay", 2, seqX, y0));
 }
 
 void drawUI() {
@@ -38,7 +41,9 @@ void drawUI() {
     fill(190, 210);
     rect(4, 4, 335, 540, 2);
     fill(0);
+    textAlign(LEFT, BOTTOM);
     text("keyCode: " + keyCode, uiXOff, height - 10);
+    text("sequencePos: " + s.get("sequencePosition"), uiXOff, height - 24);
     
     for (UIComponent c : uiComponents) {
       c.draw();

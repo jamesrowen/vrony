@@ -37,8 +37,9 @@ int lastMillis = 0;
 float animProgress = 0;
   
 void setup() {
-  size(1000, 800);
+  size(1200, 800);
   setupSettings();
+  setupSequence();
   setupUI();
 }
 
@@ -116,8 +117,14 @@ void generatePoints() {
 }
 
 void draw() {
+  float tick = (millis() - lastMillis) / 1000.0 * s.get("speed");
+  if (si.get("sequencer") == 1) {
+    if (si.get("sequencePlay") == 1) {
+      tickSequence(tick);
+    }
+  }
   if (si.get("play") == 1) {
-    animProgress += (millis() - lastMillis) / 1000.0 * s.get("speed");
+    animProgress += tick;
   }
   lastMillis = millis();
   
