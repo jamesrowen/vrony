@@ -14,10 +14,10 @@ HashMap<String, ArrayList<Keyframe>> sequenceParams = new HashMap<String, ArrayL
 
 void setupSequencer() {
   sequenceParams.put("speed", new ArrayList<Keyframe>());
-  sequenceParams.get("speed").add(new Keyframe(0, .4));
-  sequenceParams.get("speed").add(new Keyframe(4, .1));
-  sequenceParams.get("speed").add(new Keyframe(6, .05));
-  sequenceParams.get("speed").add(new Keyframe(10, .5));
+  sequenceParams.get("speed").add(new Keyframe(0, .6));
+  sequenceParams.get("speed").add(new Keyframe(4, .2));
+  sequenceParams.get("speed").add(new Keyframe(6, .08));
+  sequenceParams.get("speed").add(new Keyframe(10, .6));
   sequenceParams.put("pointOpacity", new ArrayList<Keyframe>());
   sequenceParams.get("pointOpacity").add(new Keyframe(0, .2));
   sequenceParams.get("pointOpacity").add(new Keyframe(4, .5));

@@ -26,7 +26,7 @@ void draw() {
     if (setting("sequencer") == 1) {
       tickSequence(tick);
     }
-    animProgress += tick * param("speed");
+    animProgress += tick * log(param("speed") * ((float)Math.E - 1) + 1) * .5;
   }
   lastMillis = millis();
   
