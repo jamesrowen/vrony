@@ -1,10 +1,10 @@
 ArrayList<UIComponent> uiComponents = new ArrayList<UIComponent>();
 
 int uiXOff = 8;
-int uiDarkGray = 190;
+int uiDarkGray = 210;
 int uiLightGray = 240;
-int uiDarkBorder = 80;
-int uiLightBorder = 120;
+int uiDarkBorder = 120;
+int uiLightBorder = 140;
 int uiTextBlack = 0;
 int uiLightBlue = color(117, 218, 255);
 
@@ -45,7 +45,7 @@ void setupUI() {
 void drawUI() {
   if (showUI) {
     stroke(0, 0, 0);
-    fill(180, 230);
+    fill(200, 235);
     rect(4, 4, 320, 457, 2);
     rect(4, 556, 608, 60, 2);
     fill(0);
@@ -109,6 +109,7 @@ class UIComponent {
 class Slider extends UIComponent {
   boolean active = false;
   int boxPos = 0;
+  int boxXOff = 7;
   int boxSize = 12;
   int sliderWidth = 150;
   int dragStartX = 0;
@@ -121,7 +122,8 @@ class Slider extends UIComponent {
   }
   
   void testClick() {
-    if (mouseX >= xPos + boxPos && mouseX <= xPos + boxPos + boxSize && mouseY >= yPos && mouseY <= yPos + boxSize) {
+    int x = xPos + boxPos + boxXOff;
+    if (mouseX >= x && mouseX <= x + boxSize && mouseY >= yPos && mouseY <= yPos + boxSize) {
       active = true;
       dragStartX = mouseX;
       boxStartX = boxPos;
@@ -163,7 +165,7 @@ class Slider extends UIComponent {
       fill(uiLightBlue);
       stroke(80, 80, 160);
     }
-    rect(xPos + boxPos + 7, yPos, boxSize, boxSize, 2);
+    rect(xPos + boxPos + boxXOff, yPos, boxSize, boxSize, 2);
   }
 }
 

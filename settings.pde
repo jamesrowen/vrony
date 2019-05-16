@@ -35,11 +35,11 @@ void setupSettings() {
   settingsMap.put("colorMode", new Setting(1, 0, 2, 1, true));
   settingsMap.put("palette", new Setting(1, 0, 2, 0, true));
   settingsMap.put("numColors", new Setting(1, 0, 4, 3, true));
+  settingsMap.put("borderOpacity", new Setting(0, 0, 1, 1, true));
+  settingsMap.put("pointOpacity", new Setting(0, 0, 1, 0, true));
   
   // all modes
   settingsMap.put("speed", new Setting(0, 0, 1, .2, true));
-  settingsMap.put("pointOpacity", new Setting(0, 0, 1, 0, true));
-  settingsMap.put("borderOpacity", new Setting(0, 0, 1, 1, true));
   settingsMap.put("numRings", new Setting(0, 2, 30, 16, true));
   settingsMap.put("ringSize", new Setting(0, 1, 80, 40.9, true));
   settingsMap.put("ringSpokes", new Setting(0, 3, 40, 24, true));

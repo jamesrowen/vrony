@@ -14,8 +14,8 @@ HashMap<String, ArrayList<Keyframe>> sequenceParams = new HashMap<String, ArrayL
 
 void setupSequencer() {
   sequenceParams.put("speed", new ArrayList<Keyframe>());
-  sequenceParams.get("speed").add(new Keyframe(0, .5));
-  sequenceParams.get("speed").add(new Keyframe(4, .2));
+  sequenceParams.get("speed").add(new Keyframe(0, .4));
+  sequenceParams.get("speed").add(new Keyframe(4, .1));
   sequenceParams.get("speed").add(new Keyframe(6, .05));
   sequenceParams.get("speed").add(new Keyframe(10, .5));
   sequenceParams.put("borderOpacity", new ArrayList<Keyframe>());
