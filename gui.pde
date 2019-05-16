@@ -1,6 +1,11 @@
 ArrayList<UIComponent> uiComponents = new ArrayList<UIComponent>();
 
 int uiXOff = 8;
+int uiDarkGray = 190;
+int uiLightGray = 240;
+int uiDarkBorder = 80;
+int uiLightBorder = 120;
+int uiTextBlack = 0;
 
 void setupUI() {
   textSize(14);
@@ -33,6 +38,7 @@ void setupUI() {
   // sequencer
   int seqX = 400;
   uiComponents.add(new Button("sequencePlay", seqX, y0));
+  uiComponents.add(new Timeline("timeline", 4, 560));
 }
 
 void drawUI() {
@@ -42,6 +48,8 @@ void drawUI() {
     rect(4, 4, 335, 540, 2);
     fill(0);
     textAlign(LEFT, BOTTOM);
+    
+    // debugging output
     text("keyCode: " + keyCode, uiXOff, height - 10);
     text("sequencePos: " + getSetting("sequencePosition"), uiXOff, height - 24);
     
@@ -137,19 +145,19 @@ class Slider extends UIComponent {
     boxPos = int((s.value - s.minVal) / (s.maxVal - s.minVal) * sliderWidth);
     
     // draw text
-    fill(0);
+    fill(uiTextBlack);
     textAlign(RIGHT, TOP);
     text(name + "  " + nf(s.value, 0, 1), xPos, yPos);
     textAlign(LEFT, BOTTOM);
     
     // draw track
-    fill(190);
-    stroke(100);
+    fill(uiDarkGray);
+    stroke(uiLightBorder);
     rect(xPos + 5, yPos + boxSize - 4, sliderWidth + boxSize + 4, 5, 2);
     
     // draw slider
-    fill(240);
-    stroke(80);
+    fill(uiLightGray);
+    stroke(uiDarkBorder);
     if (active) {
       fill(117, 218, 255);
       stroke(80, 80, 160);
@@ -178,11 +186,33 @@ class Button extends UIComponent {
   }
   
   void draw() {
-    fill(240);
-    stroke(80);
+    fill(uiLightGray);
+    stroke(uiDarkBorder);
     rect(xPos, yPos, w, h, 2);
-    fill(0);
+    fill(uiTextBlack);
     textAlign(CENTER, TOP);
     text(name + "  " + (int)getSetting(name), xPos + w / 2, yPos + 2);
+  }
+}
+
+
+// ********
+// Timeline
+// ********
+class Timeline extends UIComponent {
+  int w = 600;
+  
+  Timeline(String n, int x, int y) {
+    super(n, x, y);
+  }
+  
+  void draw() {
+    fill(uiDarkGray);
+    stroke(uiLightBorder);
+    rect(xPos, yPos, 600, 8, 2);
+    fill(uiLightGray);
+    stroke(uiDarkBorder);
+    int seqX = int(getSetting("sequencePosition") / getSetting("sequenceLength") * w);
+    rect(xPos + seqX, yPos - 15, 8, 30);
   }
 }

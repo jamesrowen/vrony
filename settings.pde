@@ -27,6 +27,16 @@ class Setting {
 HashMap<String, Setting> settings = new HashMap<String, Setting>();
 
 void setupSettings() {
+  // basics
+  settings.put("mode", new Setting(1, 0, 1, 1, true));
+  settings.put("play", new Setting(1, 0, 1, 1, false));
+  
+  // color
+  settings.put("colorMode", new Setting(1, 0, 2, 1, true));
+  settings.put("palette", new Setting(1, 0, 2, 0, true));
+  settings.put("numColors", new Setting(1, 0, 4, 3, true));
+  
+  // all modes
   settings.put("speed", new Setting(0, 0, 1, .2, true));
   settings.put("pointOpacity", new Setting(0, 0, 1, 0, true));
   settings.put("borderOpacity", new Setting(0, 0, 1, 1, true));
@@ -34,6 +44,7 @@ void setupSettings() {
   settings.put("ringSize", new Setting(0, 1, 80, 40.9, true));
   settings.put("ringSpokes", new Setting(0, 3, 40, 24, true));
   settings.put("ringTwist", new Setting(0, 0, .2, 0, true));
+  settings.put("alternate", new Setting(1, 0, 1, 1, true));
   
   // concentric mode
   settings.put("perturbAmount", new Setting(0, 0, 100, 20, true));
@@ -48,17 +59,10 @@ void setupSettings() {
   settings.put("lissajousY", new Setting(0, 1, 4, 1, true));
   
   //sequencer
-  settings.put("sequencePosition", new Setting(0, 0, 100000, 0, true));
-  
-  settings.put("mode", new Setting(1, 0, 1, 1, true));
-  settings.put("colorMode", new Setting(1, 0, 2, 1, true));
-  settings.put("palette", new Setting(1, 0, 2, 0, true));
-  settings.put("numColors", new Setting(1, 0, 4, 3, true));
-  settings.put("alternate", new Setting(1, 0, 1, 1, true));
-  settings.put("play", new Setting(1, 0, 1, 1, false));
-  // sequencer
   settings.put("sequencer", new Setting(1, 0, 1, 1, false));
   settings.put("sequencePlay", new Setting(1, 0, 1, 0, false));
+  settings.put("sequencePosition", new Setting(0, 0, 100000, 0, true));
+  settings.put("sequenceLength", new Setting(0, 0, 100000, 10, true));
 }
 
 float getSetting(String name) {
