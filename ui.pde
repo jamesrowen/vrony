@@ -51,9 +51,9 @@ void drawUI() {
     rect(4, 4, 320, 485, 2);
     rect(4, 556, 608, 60, 2);
     fill(0);
-    textAlign(LEFT, BOTTOM);
     
     // debugging output
+    textAlign(LEFT, BOTTOM);
     //text("keyCode: " + keyCode, uiXOff, height - 10);
     
     for (UIComponent c : uiComponents) {
