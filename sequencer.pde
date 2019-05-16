@@ -24,18 +24,18 @@ void setupSequencer() {
 }
 
 void tickSequence(float tick) {
-  setSetting("sequencePosition", getSetting("sequencePosition") + tick);
+  setSetting("sequencePosition", param("sequencePosition") + tick);
   // go through each setting and calculate the current value
   for (Map.Entry<String, ArrayList<Keyframe>> setting : sequenceParams.entrySet()) {
     ArrayList<Keyframe> keyframes = setting.getValue();
     int index = 0;
-    while (index < keyframes.size() && keyframes.get(index).time <= getSetting("sequencePosition")) {
+    while (index < keyframes.size() && keyframes.get(index).time <= param("sequencePosition")) {
       index++;
     }
     if (index < setting.getValue().size()) {
       Keyframe curr = keyframes.get(index);
       Keyframe prev = keyframes.get(index - 1);
-      float x = (getSetting("sequencePosition") - prev.time) / (curr.time - prev.time);
+      float x = (param("sequencePosition") - prev.time) / (curr.time - prev.time);
       setSetting(setting.getKey(), lerp(prev.value, curr.value, x));
     }
   }

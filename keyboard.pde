@@ -1,15 +1,15 @@
 void keyPressed() {
   // space
   if (keyCode == 32) {
-    settings.get("play").advance();
+    getSetting("play").advance();
   }
   // C
   if (keyCode == 67) {
-    settings.get("colorMode").advance();
+    getSetting("colorMode").advance();
   }
   // P
   if (keyCode == 80) {
-    settings.get("palette").advance();
+    getSetting("palette").advance();
   }
   // S
   if (keyCode == 83) {
@@ -17,6 +17,6 @@ void keyPressed() {
   }
   // M
   if (keyCode == 77) {
-    settings.get("mode").advance();
+    getSetting("mode").advance();
   }
 }

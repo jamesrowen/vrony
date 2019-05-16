@@ -51,7 +51,7 @@ void drawUI() {
     
     // debugging output
     text("keyCode: " + keyCode, uiXOff, height - 10);
-    text("sequencePos: " + getSetting("sequencePosition"), uiXOff, height - 24);
+    text("sequencePos: " + param("sequencePosition"), uiXOff, height - 24);
     
     for (UIComponent c : uiComponents) {
       c.draw();
@@ -115,7 +115,7 @@ class Slider extends UIComponent {
   
   Slider(String n, int x, int y) {
     super(n, x, y);
-    Setting s = settings.get(name);
+    Setting s = getSetting(name);
     boxPos = int((s.value - s.minVal) / (s.maxVal - s.minVal) * sliderWidth);
   }
   
@@ -130,7 +130,7 @@ class Slider extends UIComponent {
   void doDrag() {
     if (active) {
       boxPos = min(max(boxStartX + mouseX - dragStartX, 0), sliderWidth);
-      Setting s = settings.get(name);
+      Setting s = getSetting(name);
       s.value = lerp(s.minVal, s.maxVal, boxPos / float(sliderWidth));
     }
   }
@@ -140,7 +140,7 @@ class Slider extends UIComponent {
   }
   
   void draw() {
-    Setting s = settings.get(name);
+    Setting s = getSetting(name);
     // update position if changed elsewhere (keyboard, automation)
     boxPos = int((s.value - s.minVal) / (s.maxVal - s.minVal) * sliderWidth);
     
@@ -180,7 +180,7 @@ class Button extends UIComponent {
   
   void testClick() {
     if (mouseX >= xPos && mouseX <= xPos + w && mouseY >= yPos && mouseY <= yPos + h) {
-      Setting s = settings.get(name);
+      Setting s = getSetting(name);
       s.value = (int)(s.value + 1) % (int)(s.maxVal + 1);
     }
   }
@@ -191,7 +191,7 @@ class Button extends UIComponent {
     rect(xPos, yPos, w, h, 2);
     fill(uiTextBlack);
     textAlign(CENTER, TOP);
-    text(name + "  " + (int)getSetting(name), xPos + w / 2, yPos + 2);
+    text(name + "  " + setting(name), xPos + w / 2, yPos + 2);
   }
 }
 
@@ -212,7 +212,7 @@ class Timeline extends UIComponent {
     rect(xPos, yPos, 600, 8, 2);
     fill(uiLightGray);
     stroke(uiDarkBorder);
-    int seqX = int(getSetting("sequencePosition") / getSetting("sequenceLength") * w);
+    int seqX = int(param("sequencePosition") / param("sequenceLength") * w);
     rect(xPos + seqX, yPos - 15, 8, 30);
   }
 }

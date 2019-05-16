@@ -47,24 +47,24 @@ void generatePoints() {
   // ***************
   // concentric mode
   // ***************
-  if ((int)getSetting("mode") == 0) {
-    numPoints = int(getSetting("numRings")) * int(getSetting("ringSpokes"));
+  if (setting("mode") == 0) {
+    numPoints = int(param("numRings")) * int(param("ringSpokes"));
     points = new float[numPoints][2];
     
-    for (int ring = 0; ring < int(getSetting("numRings")); ring++) {
-      for (int i = ring * int(getSetting("ringSpokes")); i < (ring + 1) * int(getSetting("ringSpokes")); i++) {
-        float rotation = 2 * PI * i / getSetting("ringSpokes");
-        points[i][0] = sin(rotation + animProgress * ((int)getSetting("alternate") > 0 ? pow(-1, ring) : 1));
-        points[i][0] *= getSetting("ringSize") * (ring + .5);
+    for (int ring = 0; ring < int(param("numRings")); ring++) {
+      for (int i = ring * int(param("ringSpokes")); i < (ring + 1) * int(param("ringSpokes")); i++) {
+        float rotation = 2 * PI * i / param("ringSpokes");
+        points[i][0] = sin(rotation + animProgress * (setting("alternate") > 0 ? pow(-1, ring) : 1));
+        points[i][0] *= param("ringSize") * (ring + .5);
         points[i][0] += width / 2;
-        float perturbRot = getSetting("perturbWrap") * ring / getSetting("numRings") + animProgress * getSetting("perturbSpeed");
-        points[i][0] += getSetting("perturbAmount") * sin(perturbRot);
+        float perturbRot = param("perturbWrap") * ring / param("numRings") + animProgress * param("perturbSpeed");
+        points[i][0] += param("perturbAmount") * sin(perturbRot);
         
-        rotation = 2 * PI * i / getSetting("ringSpokes");
-        points[i][1] = cos(rotation + animProgress * ((int)getSetting("alternate") > 0 ? pow(-1, ring) : 1));
-        points[i][1] *= getSetting("ringSize") * (ring + .5);
-        perturbRot = getSetting("perturbWrap") * ring / getSetting("numRings") + animProgress * getSetting("perturbSpeed");
-        points[i][1] += height / 2 + getSetting("perturbAmount") * cos(perturbRot);
+        rotation = 2 * PI * i / param("ringSpokes");
+        points[i][1] = cos(rotation + animProgress * (setting("alternate") > 0 ? pow(-1, ring) : 1));
+        points[i][1] *= param("ringSize") * (ring + .5);
+        perturbRot = param("perturbWrap") * ring / param("numRings") + animProgress * param("perturbSpeed");
+        points[i][1] += height / 2 + param("perturbAmount") * cos(perturbRot);
       }
     }
   }
@@ -72,44 +72,44 @@ void generatePoints() {
   // ***********************
   // gears/kaleidoscope mode
   // ***********************
-  else if ((int)getSetting("mode") == 1) {
-    numPoints = int(getSetting("numRings")) * int(getSetting("ringSpokes")) + numWheels * int(getSetting("wheelSpokes"));
+  else if (setting("mode") == 1) {
+    numPoints = int(param("numRings")) * int(param("ringSpokes")) + numWheels * int(param("wheelSpokes"));
     points = new float[numPoints][2];
     
-    for (int gear = 0; gear < int(getSetting("numRings")); gear++) {
-      for (int spoke = 0; spoke < int(getSetting("ringSpokes")); spoke++) {
-        int i = gear * int(getSetting("ringSpokes")) + spoke;
+    for (int gear = 0; gear < int(param("numRings")); gear++) {
+      for (int spoke = 0; spoke < int(param("ringSpokes")); spoke++) {
+        int i = gear * int(param("ringSpokes")) + spoke;
         
-        float rotation = 2 * PI * spoke / getSetting("ringSpokes");
-        rotation += gear * getSetting("ringTwist");
-        rotation += animProgress * ((int)getSetting("alternate") > 0 ? pow(-1, gear) : 1);
+        float rotation = 2 * PI * spoke / param("ringSpokes");
+        rotation += gear * param("ringTwist");
+        rotation += animProgress * (setting("alternate") > 0 ? pow(-1, gear) : 1);
         points[i][0] = sin(rotation);
-        points[i][0] *= getSetting("ringSize") * gearScale;
-        points[i][0] += width / 2 + sin(2 * PI * gear / getSetting("numRings")) * getSetting("wheelSize");
+        points[i][0] *= param("ringSize") * gearScale;
+        points[i][0] += width / 2 + sin(2 * PI * gear / param("numRings")) * param("wheelSize");
         
-        rotation = 2 * PI * spoke / getSetting("ringSpokes");
-        rotation += gear * getSetting("ringTwist");
-        rotation += animProgress * ((int)getSetting("alternate") > 0 ? pow(-1, gear) : 1);
+        rotation = 2 * PI * spoke / param("ringSpokes");
+        rotation += gear * param("ringTwist");
+        rotation += animProgress * (setting("alternate") > 0 ? pow(-1, gear) : 1);
         points[i][1] = cos(rotation);
-        points[i][1] *= getSetting("ringSize") * gearScale;
-        points[i][1] += height / 2 + cos(2 * PI * gear / getSetting("numRings")) * getSetting("wheelSize");
+        points[i][1] *= param("ringSize") * gearScale;
+        points[i][1] += height / 2 + cos(2 * PI * gear / param("numRings")) * param("wheelSize");
       }
     }
     
     for (int wheel = 0; wheel < numWheels; wheel++) {
-      for (int spoke = 0; spoke < int(getSetting("wheelSpokes")); spoke++) {
-        int i = int(getSetting("numRings")) * int(getSetting("ringSpokes")) + wheel * int(getSetting("wheelSpokes")) + spoke;
+      for (int spoke = 0; spoke < int(param("wheelSpokes")); spoke++) {
+        int i = int(param("numRings")) * int(param("ringSpokes")) + wheel * int(param("wheelSpokes")) + spoke;
         
-        float rotation = 2 * PI * spoke / getSetting("wheelSpokes");
-        rotation += animProgress * getSetting("wheelSpeed") * ((int)getSetting("alternate") > 0 ? pow(-1, wheel) : 1);
-        points[i][0] = sin(getSetting("lissajousX") * rotation);
-        points[i][0] *= getSetting("wheelSize") / (wheel + 1);
+        float rotation = 2 * PI * spoke / param("wheelSpokes");
+        rotation += animProgress * param("wheelSpeed") * (setting("alternate") > 0 ? pow(-1, wheel) : 1);
+        points[i][0] = sin(param("lissajousX") * rotation);
+        points[i][0] *= param("wheelSize") / (wheel + 1);
         points[i][0] += width / 2;
         
-        rotation = 2 * PI * spoke / getSetting("wheelSpokes");
-        rotation += animProgress * getSetting("wheelSpeed") * ((int)getSetting("alternate") > 0 ? pow(-1, wheel) : 1);
-        points[i][1] = cos(getSetting("lissajousY") * rotation);
-        points[i][1] *= getSetting("wheelSize") / (wheel + 1);
+        rotation = 2 * PI * spoke / param("wheelSpokes");
+        rotation += animProgress * param("wheelSpeed") * (setting("alternate") > 0 ? pow(-1, wheel) : 1);
+        points[i][1] = cos(param("lissajousY") * rotation);
+        points[i][1] *= param("wheelSize") / (wheel + 1);
         points[i][1] += height / 2;
       }
     }
@@ -117,14 +117,16 @@ void generatePoints() {
 }
 
 void draw() {
-  float tick = (millis() - lastMillis) / 1000.0 * getSetting("speed");
-  if ((int)getSetting("sequencer") == 1) {
-    if ((int)getSetting("sequencePlay") == 1) {
+  float tick = (millis() - lastMillis) / 1000.0;
+  if (setting("sequencer") == 1) {
+    if (setting("sequencePlay") == 1) {
       tickSequence(tick);
     }
   }
-  if ((int)getSetting("play") == 1) {
-    animProgress += tick;
+  if (setting("play") == 1) {
+    if (setting("sequencer") == 1)
+    
+    animProgress += tick * param("speed");
   }
   lastMillis = millis();
   
@@ -135,26 +137,26 @@ void draw() {
 
   // color the rings
   color temp;
-  for (int ring = 0; ring < int(getSetting("numRings")); ring++) {
-    for (int spoke = 0; spoke < int(getSetting("ringSpokes")); spoke++) {
-      int i = ring * int(getSetting("ringSpokes")) + spoke;
+  for (int ring = 0; ring < int(param("numRings")); ring++) {
+    for (int spoke = 0; spoke < int(param("ringSpokes")); spoke++) {
+      int i = ring * int(param("ringSpokes")) + spoke;
       
       // cycle through colors cell by cell
-      if ((int)getSetting("colorMode") == 0) {
-        fill(lerpColor(palettes[(int)getSetting("palette")][i % ((int)getSetting("numColors") + 1)], color(255), .2));
-        temp = palettes[(int)getSetting("palette")][i % ((int)getSetting("numColors") + 1)];
-        stroke(red(temp), green(temp), blue(temp), 255 * getSetting("borderOpacity"));
+      if (setting("colorMode") == 0) {
+        fill(lerpColor(palettes[setting("palette")][i % (setting("numColors") + 1)], color(255), .2));
+        temp = palettes[setting("palette")][i % (setting("numColors") + 1)];
+        stroke(red(temp), green(temp), blue(temp), 255 * param("borderOpacity"));
       }
       
       // cycle through colors ring by ring.
       // alternate between black and colored rings, or by cell (colorMode 2)
-      else if ((int)getSetting("colorMode") == 1 || (int)getSetting("colorMode") == 2) {
-        fill(lerpColor(palettes[(int)getSetting("palette")][(ring / 2) % ((int)getSetting("numColors") + 1)], color(0), .15));
-        temp = lerpColor(palettes[(int)getSetting("palette")][(ring / 2) % ((int)getSetting("numColors") + 1)], color(0), .25);
-        stroke(red(temp), green(temp), blue(temp), 255 * getSetting("borderOpacity"));
-        if ((int)getSetting("colorMode") == 1 && ring % 2 == 0 || (int)getSetting("colorMode") == 2 && spoke % 2 == 0) {
+      else if (setting("colorMode") == 1 || setting("colorMode") == 2) {
+        fill(lerpColor(palettes[setting("palette")][(ring / 2) % (setting("numColors") + 1)], color(0), .15));
+        temp = lerpColor(palettes[setting("palette")][(ring / 2) % (setting("numColors") + 1)], color(0), .25);
+        stroke(red(temp), green(temp), blue(temp), 255 * param("borderOpacity"));
+        if (setting("colorMode") == 1 && ring % 2 == 0 || setting("colorMode") == 2 && spoke % 2 == 0) {
           fill(44);
-          stroke(30, int(255 * getSetting("borderOpacity")));
+          stroke(30, int(255 * param("borderOpacity")));
         }
       }
       polygons[i].draw(this);
@@ -162,10 +164,10 @@ void draw() {
   }
     
   // color the big wheel(s) white
-  if ((int)getSetting("mode") == 1) {
+  if (setting("mode") == 1) {
     for (int wheel = 0; wheel < numWheels; wheel++) {
-      for (int spoke = 0; spoke < int(getSetting("wheelSpokes")); spoke++) {
-        int i = int(getSetting("numRings")) * int(getSetting("ringSpokes")) + wheel * int(getSetting("wheelSpokes")) + spoke;
+      for (int spoke = 0; spoke < int(param("wheelSpokes")); spoke++) {
+        int i = int(param("numRings")) * int(param("ringSpokes")) + wheel * int(param("wheelSpokes")) + spoke;
         fill(215);
         stroke(200);
         polygons[i].draw(this);
@@ -175,9 +177,9 @@ void draw() {
   
   // draw generator points
   for (int i = 0; i < numPoints; i++) {
-    stroke(235, 255 * getSetting("pointOpacity"));
+    stroke(235, 255 * param("pointOpacity"));
     point(points[i][0], points[i][1]);
-    stroke(180, 255 * getSetting("pointOpacity") * .9);
+    stroke(180, 255 * param("pointOpacity") * .9);
     point(points[i][0] + 1, points[i][1] + 1);
     point(points[i][0] - 1, points[i][1] + 1);
     point(points[i][0] + 1, points[i][1] - 1);
