@@ -18,10 +18,11 @@ void setupSequencer() {
   sequenceParams.get("speed").add(new Keyframe(4, .1));
   sequenceParams.get("speed").add(new Keyframe(6, .05));
   sequenceParams.get("speed").add(new Keyframe(10, .5));
-  sequenceParams.put("borderOpacity", new ArrayList<Keyframe>());
-  sequenceParams.get("borderOpacity").add(new Keyframe(0, 0));
-  sequenceParams.get("borderOpacity").add(new Keyframe(5, 1));
-  sequenceParams.get("borderOpacity").add(new Keyframe(10, 0));
+  sequenceParams.put("pointOpacity", new ArrayList<Keyframe>());
+  sequenceParams.get("pointOpacity").add(new Keyframe(0, .2));
+  sequenceParams.get("pointOpacity").add(new Keyframe(4, .5));
+  sequenceParams.get("pointOpacity").add(new Keyframe(6, 0));
+  sequenceParams.get("pointOpacity").add(new Keyframe(8, .2));
   sequenceParams.put("ringSize", new ArrayList<Keyframe>());
   sequenceParams.get("ringSize").add(new Keyframe(0, 10));
   sequenceParams.get("ringSize").add(new Keyframe(4, 70));

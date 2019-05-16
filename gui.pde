@@ -12,24 +12,26 @@ void setupUI() {
   textSize(12);
   int x0 = 145;
   int y0 = 12;
-  int spacing = 26;
+  int spacing = 25;
   int bSpacing = 105;
-  int by = 410;
+  int by = 15 + spacing * 17;
   uiComponents.add(new Slider("speed", x0, y0));
   uiComponents.add(new Slider("pointOpacity", x0, y0 + spacing * 1));
-  uiComponents.add(new Slider("borderOpacity", x0, y0 + spacing * 2));
-  uiComponents.add(new Slider("numRings", x0, y0 + spacing * 3));
-  uiComponents.add(new Slider("ringSpokes", x0, y0 + spacing * 4));
-  uiComponents.add(new Slider("ringSize", x0, y0 + spacing * 5));
-  uiComponents.add(new Slider("ringTwist", x0, y0 + spacing * 6));
-  uiComponents.add(new Slider("wheelSpokes", x0, y0 + spacing * 7));
-  uiComponents.add(new Slider("wheelSize", x0, y0 + spacing * 8));
-  uiComponents.add(new Slider("wheelSpeed", x0, y0 + spacing * 9));
-  uiComponents.add(new Slider("lissajousX", x0, y0 + spacing * 10));
-  uiComponents.add(new Slider("lissajousY", x0, y0 + spacing * 11));
-  uiComponents.add(new Slider("perturbAmount", x0, y0 + spacing * 12));
-  uiComponents.add(new Slider("perturbSpeed", x0, y0 + spacing * 13));
-  uiComponents.add(new Slider("perturbWrap", x0, y0 + spacing * 14));
+  uiComponents.add(new Slider("brightness", x0, y0 + spacing * 2));
+  uiComponents.add(new Slider("borderBrightness", x0, y0 + spacing * 3));
+  uiComponents.add(new Slider("borderBlack", x0, y0 + spacing * 4));
+  uiComponents.add(new Slider("numRings", x0, y0 + spacing * 5));
+  uiComponents.add(new Slider("ringSpokes", x0, y0 + spacing * 6));
+  uiComponents.add(new Slider("ringSize", x0, y0 + spacing * 7));
+  uiComponents.add(new Slider("ringTwist", x0, y0 + spacing * 8));
+  uiComponents.add(new Slider("wheelSpokes", x0, y0 + spacing * 9));
+  uiComponents.add(new Slider("wheelSize", x0, y0 + spacing * 10));
+  uiComponents.add(new Slider("wheelSpeed", x0, y0 + spacing * 11));
+  uiComponents.add(new Slider("lissajousX", x0, y0 + spacing * 12));
+  uiComponents.add(new Slider("lissajousY", x0, y0 + spacing * 13));
+  uiComponents.add(new Slider("perturbAmount", x0, y0 + spacing * 14));
+  uiComponents.add(new Slider("perturbSpeed", x0, y0 + spacing * 15));
+  uiComponents.add(new Slider("perturbWrap", x0, y0 + spacing * 16));
   uiComponents.add(new Button("play", uiXOff, by));
   uiComponents.add(new Button("mode", uiXOff + bSpacing, by));
   uiComponents.add(new Button("alternate", uiXOff + bSpacing * 2, by));
@@ -46,7 +48,7 @@ void drawUI() {
   if (showUI) {
     stroke(0, 0, 0);
     fill(200, 235);
-    rect(4, 4, 320, 457, 2);
+    rect(4, 4, 320, 485, 2);
     rect(4, 556, 608, 60, 2);
     fill(0);
     textAlign(LEFT, BOTTOM);
@@ -156,7 +158,7 @@ class Slider extends UIComponent {
     // draw track
     fill(uiDarkGray);
     stroke(uiLightBorder);
-    rect(xPos + 5, yPos + boxSize - 2, sliderWidth + boxSize + 4, 5, 2);
+    rect(xPos + 5, yPos + boxSize - 3, sliderWidth + boxSize + 4, 5, 2);
     
     // draw slider
     fill(uiLightGray);
@@ -165,7 +167,7 @@ class Slider extends UIComponent {
       fill(uiLightBlue);
       stroke(80, 80, 160);
     }
-    rect(xPos + boxPos + boxXOff, yPos, boxSize, boxSize, 2);
+    rect(xPos + boxPos + boxXOff, yPos - 1, boxSize, boxSize, 2);
   }
 }
 

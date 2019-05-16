@@ -35,8 +35,10 @@ void setupSettings() {
   settingsMap.put("colorMode", new Setting(1, 0, 2, 1, true));
   settingsMap.put("palette", new Setting(1, 0, 2, 0, true));
   settingsMap.put("numColors", new Setting(1, 0, 4, 3, true));
-  settingsMap.put("borderOpacity", new Setting(0, 0, 1, 1, true));
+  settingsMap.put("borderBrightness", new Setting(0, 0, 1, 0, true));
+  settingsMap.put("borderBlack", new Setting(0, 0, 90, 45, true));
   settingsMap.put("pointOpacity", new Setting(0, 0, 1, 0, true));
+  settingsMap.put("brightness", new Setting(0, 0, 1, 1, true));
   
   // all modes
   settingsMap.put("speed", new Setting(0, 0, 1, .2, true));
