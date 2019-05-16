@@ -14,17 +14,23 @@ HashMap<String, ArrayList<Keyframe>> sequenceParams = new HashMap<String, ArrayL
 
 void setupSequencer() {
   sequenceParams.put("speed", new ArrayList<Keyframe>());
-  sequenceParams.get("speed").add(new Keyframe(0, .2));
-  sequenceParams.get("speed").add(new Keyframe(3, .7));
-  sequenceParams.get("speed").add(new Keyframe(4, .1));
-  sequenceParams.put("pointOpacity", new ArrayList<Keyframe>());
-  sequenceParams.get("pointOpacity").add(new Keyframe(0, 0));
-  sequenceParams.get("pointOpacity").add(new Keyframe(3, 1));
-  sequenceParams.get("pointOpacity").add(new Keyframe(5, 0));
+  sequenceParams.get("speed").add(new Keyframe(0, .5));
+  sequenceParams.get("speed").add(new Keyframe(4, .2));
+  sequenceParams.get("speed").add(new Keyframe(6, .05));
+  sequenceParams.get("speed").add(new Keyframe(10, .5));
+  sequenceParams.put("borderOpacity", new ArrayList<Keyframe>());
+  sequenceParams.get("borderOpacity").add(new Keyframe(0, 0));
+  sequenceParams.get("borderOpacity").add(new Keyframe(5, 1));
+  sequenceParams.get("borderOpacity").add(new Keyframe(10, 0));
+  sequenceParams.put("ringSize", new ArrayList<Keyframe>());
+  sequenceParams.get("ringSize").add(new Keyframe(0, 10));
+  sequenceParams.get("ringSize").add(new Keyframe(4, 70));
+  sequenceParams.get("ringSize").add(new Keyframe(6, 80));
+  sequenceParams.get("ringSize").add(new Keyframe(10, 10));
 }
 
 void tickSequence(float tick) {
-  setSetting("sequencePosition", param("sequencePosition") + tick);
+  setSetting("sequencePosition", (param("sequencePosition") + tick) % param("sequenceLength"));
   // go through each setting and calculate the current value
   for (Map.Entry<String, ArrayList<Keyframe>> setting : sequenceParams.entrySet()) {
     ArrayList<Keyframe> keyframes = setting.getValue();

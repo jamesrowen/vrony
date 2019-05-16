@@ -118,14 +118,10 @@ void generatePoints() {
 
 void draw() {
   float tick = (millis() - lastMillis) / 1000.0;
-  if (setting("sequencer") == 1) {
-    if (setting("sequencePlay") == 1) {
+  if (setting("play") == 1) {
+    if (setting("sequencer") == 1) {
       tickSequence(tick);
     }
-  }
-  if (setting("play") == 1) {
-    if (setting("sequencer") == 1)
-    
     animProgress += tick * param("speed");
   }
   lastMillis = millis();

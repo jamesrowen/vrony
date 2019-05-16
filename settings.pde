@@ -29,7 +29,7 @@ HashMap<String, Setting> settingsMap = new HashMap<String, Setting>();
 void setupSettings() {
   // basics
   settingsMap.put("mode", new Setting(1, 0, 1, 1, true));
-  settingsMap.put("play", new Setting(1, 0, 1, 1, false));
+  settingsMap.put("play", new Setting(2, 0, 1, 1, false));
   
   // color
   settingsMap.put("colorMode", new Setting(1, 0, 2, 1, true));
@@ -44,11 +44,11 @@ void setupSettings() {
   settingsMap.put("ringSize", new Setting(0, 1, 80, 40.9, true));
   settingsMap.put("ringSpokes", new Setting(0, 3, 40, 24, true));
   settingsMap.put("ringTwist", new Setting(0, 0, .2, 0, true));
-  settingsMap.put("alternate", new Setting(1, 0, 1, 1, true));
+  settingsMap.put("alternate", new Setting(2, 0, 1, 1, true));
   
   // concentric mode
   settingsMap.put("perturbAmount", new Setting(0, 0, 100, 20, true));
-  settingsMap.put("perturbSpeed", new Setting(0, 2, 40, 5, true));
+  settingsMap.put("perturbSpeed", new Setting(0, 2, 20, 5, true));
   settingsMap.put("perturbWrap", new Setting(0, 0, 100, 5, true));
   
   // gear mode
@@ -59,8 +59,7 @@ void setupSettings() {
   settingsMap.put("lissajousY", new Setting(0, 1, 4, 1, true));
   
   //sequencer
-  settingsMap.put("sequencer", new Setting(1, 0, 1, 1, false));
-  settingsMap.put("sequencePlay", new Setting(1, 0, 1, 0, false));
+  settingsMap.put("sequencer", new Setting(2, 0, 1, 1, false));
   settingsMap.put("sequencePosition", new Setting(0, 0, 100000, 0, true));
   settingsMap.put("sequenceLength", new Setting(0, 0, 100000, 10, true));
 }
