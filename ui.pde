@@ -44,6 +44,7 @@ void setupUI() {
   int seqY = 560;
   uiComponents.add(new Timeline("timeline", uiXOff, seqY));
   uiComponents.add(new Button("sequencer", uiXOff, seqY + 4));
+  uiComponents.add(new Input("sequenceLength", uiXOff + 202, seqY + 4));
 }
 
 void drawUI() {
@@ -57,8 +58,8 @@ void drawUI() {
     }
     
     // debugging output
-    fill(uiTextBlack);
-    textAlign(LEFT, BOTTOM);
+    //fill(uiTextBlack);
+    //textAlign(LEFT, BOTTOM);
     //text("keyCode: " + keyCode, uiXOff, height - 10);
   }
 }
@@ -86,9 +87,9 @@ void mouseReleased() {
 }
 
 
-// *****************
+// ************************
 // Base UI Component
-// *****************
+// ************************
 class UIComponent {
   String name;
   int xPos, yPos;
@@ -106,9 +107,9 @@ class UIComponent {
 }
 
 
-// ******
+// ************************
 // Slider
-// ******
+// ************************
 class Slider extends UIComponent {
   boolean active = false;
   int boxPos = 0;
@@ -154,7 +155,6 @@ class Slider extends UIComponent {
     fill(uiTextBlack);
     textAlign(RIGHT, TOP);
     text(name + "  " + nf(s.value, 0, 1), xPos, yPos);
-    textAlign(LEFT, BOTTOM);
     
     // draw track
     fill(uiDarkGray);
@@ -173,12 +173,12 @@ class Slider extends UIComponent {
 }
 
 
-// ******
+// ************************
 // Button
-// ******
+// ************************
 class Button extends UIComponent {
   int w = 100;
-  int h = 19;
+  int h = 20;
   
   Button(String n, int x, int y) {
     super(n, x, y);
@@ -186,8 +186,7 @@ class Button extends UIComponent {
   
   void testClick() {
     if (mouseX >= xPos && mouseX <= xPos + w && mouseY >= yPos && mouseY <= yPos + h) {
-      Setting s = getSetting(name);
-      s.value = (int)(s.value + 1) % (int)(s.maxVal + 1);
+      getSetting(name).advance();
     }
   }
   
@@ -201,19 +200,59 @@ class Button extends UIComponent {
     rect(xPos, yPos, w, h, 2);
     fill(uiTextBlack);
     textAlign(CENTER, TOP);
-    text(name + (s.type == 2 ? "" : ": " + (int)s.value), xPos + w / 2, yPos + 2);
+    text(name + (s.type == 2 ? "" : ": " + (int)s.value), xPos + w / 2, yPos + 3);
   }
 }
 
+// ************************
+// Input
+// ************************
+class Input extends UIComponent {
+  boolean active = false;
+  int w = 50;
+  int h = 20;
+  Input(String n, int x, int y) {
+    super(n, x, y);
+  }
+  
+  void draw() {
+    Setting s = getSetting(name);
+    
+    // box
+    fill(uiLightGray);
+    if (active) {
+      fill(uiLightBlue);
+    }
+    stroke(uiDarkBorder);
+    rect(xPos + 2, yPos, w, h, 2);
+    
+    // text
+    fill(uiTextBlack);
+    textAlign(RIGHT, TOP);
+    text(name, xPos, yPos + 3);
+    textAlign(LEFT, TOP);
+    text((int)s.value, xPos + 10, yPos + 3);
+  }
+  
+  void testClick() {
+    if (mouseX >= xPos && mouseX <= xPos + w && mouseY >= yPos && mouseY <= yPos + h) {
+      active = true;
+    }
+    else {
+      active = false;
+    }
+  }
+}
 
-// ********
+// ************************
 // Timeline
-// ********
+// ************************
 class Timeline extends UIComponent {
-  int trackSpacing = 22;
-  int trackOffset = 100;
+  int trackXOffset = 100;
+  int trackYOffset = 35;
   int trackWidth = 600;
-  int trackPadding = 2;
+  int trackHeight = 30;
+  int trackPadding = 5;
   
   Timeline(String n, int x, int y) {
     super(n, x, y);
@@ -221,32 +260,44 @@ class Timeline extends UIComponent {
   
   void draw() {
     int numParams = sequenceParams.entrySet().size();
-    int trackStart = xPos + trackOffset;
-    int panelWidth = trackOffset + trackWidth + 8;
+    int trackX = xPos + trackXOffset;
+    int panelWidth = trackXOffset + trackWidth + 8;
     
     // panel background
     stroke(uiDarkBorder);
     fill(uiPanelBG);
-    rect(xPos - 4, yPos, panelWidth, 60 + numParams * trackSpacing, 2);
+    rect(xPos - 4, yPos, panelWidth, trackYOffset + numParams * trackHeight, 2);
+    
+    
+    // draw track backgrounds before position marker
+    int i = 0;
+    fill(220);
+    stroke(uiLightBorder);
+    for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
+      int trackY = yPos + trackYOffset + i * trackHeight;
+      rect(trackX, trackY, trackWidth + 4, trackHeight);
+      i++;
+    }
     
     // position marker
-    fill(uiLightGray);
+    fill(uiLightBorder);
     noStroke();
     int markerX = int(param("sequencePosition") / param("sequenceLength") * (trackWidth - 2));
-    rect(trackStart + markerX, yPos + 28, 2, 30 + numParams * trackSpacing, 2);
+    rect(trackX + markerX, yPos + 28, 2, 7 + numParams * trackHeight, 2);
     
     // parameter tracks
-    int i = 0;
+    i = 0;
     textAlign(LEFT, TOP);
     for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
+      int trackY = yPos + trackYOffset + i * trackHeight;
+      
+      // name box
+      stroke(uiLightBorder);
+      fill(240);
+      rect(xPos - 4, trackY, trackXOffset + 4, trackHeight);
       // name text
       fill(uiTextBlack);
-      int yStart = yPos + 40 + i * trackSpacing;
-      text(seqParam.getKey(), xPos, yStart + 3);
-      
-      // border lines
-      stroke(uiLightBorder);
-      line(xPos - 4, yStart, panelWidth + 4, yStart);
+      text(seqParam.getKey(), xPos, trackY + 7);
       
       // keyframes
       fill(uiKeyframe);
@@ -254,13 +305,16 @@ class Timeline extends UIComponent {
       int j = 0;
       for (Keyframe k : seqParam.getValue()) {
         int xOff = int(k.time / param("sequenceLength") * trackWidth);
-        int yPct = int(k.value / getSetting(seqParam.getKey()).maxVal);
-        int yOff = yPct * (trackSpacing - trackPadding * 2) + trackPadding;
+        float yPct = k.value / getSetting(seqParam.getKey()).maxVal;
+        int yOff = int(yPct * (trackHeight - trackPadding * 2)) + trackPadding;
         noStroke();
-        circle(trackStart + xOff, yStart + yOff, 5);
+        circle(trackX + xOff, trackY + yOff, 5);
         stroke(uiKeyframe);
         if (j > 0) {
-          line(trackStart + xOff, yStart + yOff, trackStart + prevX, yStart + prevY);
+          line(trackX + xOff, trackY + yOff, trackX + prevX, trackY + prevY);
+        }
+        if (j == seqParam.getValue().size() - 1 && k.time < param("sequenceLength")) {
+          line(trackX + xOff, trackY + yOff, trackX + trackWidth, trackY + yOff);
         }
         prevX = xOff;
         prevY = yOff;
