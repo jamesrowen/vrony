@@ -6,7 +6,9 @@ int uiLightGray = 240;
 int uiDarkBorder = 120;
 int uiLightBorder = 140;
 int uiTextBlack = 0;
-int uiLightBlue = color(117, 218, 255);
+color uiLightBlue = color(117, 218, 255);
+color uiPanelBG = color(200, 250);
+color uiKeyframe = color(200, 0, 0);
 
 void setupUI() {
   textSize(12);
@@ -40,25 +42,24 @@ void setupUI() {
   uiComponents.add(new Button("numColors", uiXOff + bSpacing * 2, by + 25));
   // sequencer
   int seqY = 560;
-  uiComponents.add(new Button("sequencer", uiXOff, seqY));
-  uiComponents.add(new Timeline("timeline", uiXOff, seqY + 25));
+  uiComponents.add(new Timeline("timeline", uiXOff, seqY));
+  uiComponents.add(new Button("sequencer", uiXOff, seqY + 4));
 }
 
 void drawUI() {
   if (showUI) {
-    stroke(0, 0, 0);
-    fill(200, 235);
+    stroke(uiDarkBorder);
+    fill(uiPanelBG);
     rect(4, 4, 320, 485, 2);
-    rect(4, 556, 608, 60, 2);
-    fill(0);
-    
-    // debugging output
-    textAlign(LEFT, BOTTOM);
-    //text("keyCode: " + keyCode, uiXOff, height - 10);
     
     for (UIComponent c : uiComponents) {
       c.draw();
     }
+    
+    // debugging output
+    fill(uiTextBlack);
+    textAlign(LEFT, BOTTOM);
+    //text("keyCode: " + keyCode, uiXOff, height - 10);
   }
 }
 
@@ -209,19 +210,63 @@ class Button extends UIComponent {
 // Timeline
 // ********
 class Timeline extends UIComponent {
-  int w = 600;
+  int trackSpacing = 22;
+  int trackOffset = 100;
+  int trackWidth = 600;
+  int trackPadding = 2;
   
   Timeline(String n, int x, int y) {
     super(n, x, y);
   }
   
   void draw() {
-    fill(uiDarkGray);
-    stroke(uiLightBorder);
-    rect(xPos, yPos, 600, 5, 2);
-    fill(uiLightGray);
+    int numParams = sequenceParams.entrySet().size();
+    int trackStart = xPos + trackOffset;
+    int panelWidth = trackOffset + trackWidth + 8;
+    
+    // panel background
     stroke(uiDarkBorder);
-    int seqX = int(param("sequencePosition") / param("sequenceLength") * (w - 6));
-    rect(xPos + seqX, yPos - 5, 8, 16, 2);
+    fill(uiPanelBG);
+    rect(xPos - 4, yPos, panelWidth, 60 + numParams * trackSpacing, 2);
+    
+    // position marker
+    fill(uiLightGray);
+    noStroke();
+    int markerX = int(param("sequencePosition") / param("sequenceLength") * (trackWidth - 2));
+    rect(trackStart + markerX, yPos + 28, 2, 30 + numParams * trackSpacing, 2);
+    
+    // parameter tracks
+    int i = 0;
+    textAlign(LEFT, TOP);
+    for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
+      // name text
+      fill(uiTextBlack);
+      int yStart = yPos + 40 + i * trackSpacing;
+      text(seqParam.getKey(), xPos, yStart + 3);
+      
+      // border lines
+      stroke(uiLightBorder);
+      line(xPos - 4, yStart, panelWidth + 4, yStart);
+      
+      // keyframes
+      fill(uiKeyframe);
+      int prevX = 0, prevY = 0;
+      int j = 0;
+      for (Keyframe k : seqParam.getValue()) {
+        int xOff = int(k.time / param("sequenceLength") * trackWidth);
+        int yPct = int(k.value / getSetting(seqParam.getKey()).maxVal);
+        int yOff = yPct * (trackSpacing - trackPadding * 2) + trackPadding;
+        noStroke();
+        circle(trackStart + xOff, yStart + yOff, 5);
+        stroke(uiKeyframe);
+        if (j > 0) {
+          line(trackStart + xOff, yStart + yOff, trackStart + prevX, yStart + prevY);
+        }
+        prevX = xOff;
+        prevY = yOff;
+        j++;
+      }
+      i++;
+    }
   }
 }
