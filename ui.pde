@@ -278,18 +278,13 @@ class Timeline extends UIComponent {
       int trackTop = yPos + trackYOff + i * trackHeight;
       int trackBottom = trackTop + trackHeight;
       
-      // track background
-      fill(200);
+      // name and track boxes
       stroke(uiLightBorder);
       strokeWeight(1.8);
-      rect(trackX, trackTop, trackWidth - 1, trackHeight);
-      strokeWeight(1);
-      
-      // name box
-      stroke(uiLightBorder);
-      strokeWeight(1.8);
-      fill(185);
+      fill(190);
       rect(xPos + 1, trackTop, trackXOff - 1, trackHeight);
+      fill(200);
+      rect(trackX, trackTop, trackWidth - 1, trackHeight);
       strokeWeight(1);
       
       // name text

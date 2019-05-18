@@ -63,7 +63,7 @@ void setupSettings() {
   //sequencer
   settingsMap.put("sequencer", new Setting(2, 0, 1, 1, false));
   settingsMap.put("sequencePosition", new Setting(0, 0, 100000, 0, true));
-  settingsMap.put("sequenceLength", new Setting(0, 0, 100000, 10, true));
+  settingsMap.put("sequenceLength", new Setting(0, 0, 100000, 20, true));
 }
 
 float param(String name) {
