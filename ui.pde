@@ -1,57 +1,57 @@
 ArrayList<UIComponent> uiComponents = new ArrayList<UIComponent>();
 
-int uiXOff = 8;
+int uiPadding = 5;
 int uiDarkGray = 210;
 int uiLightGray = 240;
 int uiDarkBorder = 120;
-int uiLightBorder = 140;
+int uiLightBorder = 135;
 int uiTextBlack = 0;
 color uiLightBlue = color(117, 218, 255);
-color uiPanelBG = color(200, 250);
-color uiKeyframe = color(200, 0, 0);
+color uiPanelBG = color(220, 250);
+color uiKeyframe = color(255, 0, 0);
 
 void setupUI() {
   textSize(12);
-  int x0 = 145;
-  int y0 = 12;
-  int spacing = 25;
-  int bSpacing = 105;
-  int by = 15 + spacing * 17;
-  uiComponents.add(new Slider("speed", x0, y0));
-  uiComponents.add(new Slider("pointOpacity", x0, y0 + spacing * 1));
-  uiComponents.add(new Slider("brightness", x0, y0 + spacing * 2));
-  uiComponents.add(new Slider("borderBrightness", x0, y0 + spacing * 3));
-  uiComponents.add(new Slider("borderBlack", x0, y0 + spacing * 4));
-  uiComponents.add(new Slider("numRings", x0, y0 + spacing * 5));
-  uiComponents.add(new Slider("ringSpokes", x0, y0 + spacing * 6));
-  uiComponents.add(new Slider("ringSize", x0, y0 + spacing * 7));
-  uiComponents.add(new Slider("ringTwist", x0, y0 + spacing * 8));
-  uiComponents.add(new Slider("wheelSpokes", x0, y0 + spacing * 9));
-  uiComponents.add(new Slider("wheelSize", x0, y0 + spacing * 10));
-  uiComponents.add(new Slider("wheelSpeed", x0, y0 + spacing * 11));
-  uiComponents.add(new Slider("lissajousX", x0, y0 + spacing * 12));
-  uiComponents.add(new Slider("lissajousY", x0, y0 + spacing * 13));
-  uiComponents.add(new Slider("perturbAmount", x0, y0 + spacing * 14));
-  uiComponents.add(new Slider("perturbSpeed", x0, y0 + spacing * 15));
-  uiComponents.add(new Slider("perturbWrap", x0, y0 + spacing * 16));
-  uiComponents.add(new Button("play", uiXOff, by));
-  uiComponents.add(new Button("mode", uiXOff + bSpacing, by));
-  uiComponents.add(new Button("alternate", uiXOff + bSpacing * 2, by));
-  uiComponents.add(new Button("colorMode", uiXOff, by + 25));
-  uiComponents.add(new Button("palette", uiXOff + bSpacing, by + 25));
-  uiComponents.add(new Button("numColors", uiXOff + bSpacing * 2, by + 25));
-  // sequencer
-  int seqY = 560;
-  uiComponents.add(new Timeline("timeline", uiXOff, seqY));
-  uiComponents.add(new Button("sequencer", uiXOff, seqY + 4));
-  uiComponents.add(new Input("sequenceLength", uiXOff + 202, seqY + 4));
+  
+  // sliders
+  int sliderX = 141 + uiPadding;
+  int sliderYStart = uiPadding * 2 + 2;
+  int sliderSpacing = 25;
+  String[] sliders = {"speed", "pointOpacity", "brightness", "borderBrightness",
+    "borderBlack", "numRings", "ringSpokes", "ringSize", "ringTwist", "wheelSpokes",
+    "wheelSize", "wheelSpeed", "lissajousX", "lissajousY", "perturbAmount", 
+    "perturbSpeed", "perturbWrap"};
+  for (int i = 0; i < sliders.length; i++) {
+    uiComponents.add(
+      new Slider(sliders[i], sliderX, sliderYStart + sliderSpacing * i)
+    );
+  }
+  
+  // buttons
+  int bX = uiPadding * 2;
+  int bY = 14 + sliderSpacing * sliders.length;
+  int bXSpacing = 101 + uiPadding;
+  int bYSpacing = 21 + uiPadding;
+  uiComponents.add(new Button("play", bX, bY));
+  uiComponents.add(new Button("mode", bX + bXSpacing, bY));
+  uiComponents.add(new Button("alternate", bX + bXSpacing * 2, bY));
+  uiComponents.add(new Button("colorMode", bX, bY + bYSpacing));
+  uiComponents.add(new Button("palette", bX + bXSpacing, bY + bYSpacing));
+  uiComponents.add(new Button("numColors", bX + bXSpacing * 2, bY + bYSpacing));
+  
+  // sequencer timeline
+  int timelineY = 560;
+  uiComponents.add(new Timeline("timeline", uiPadding, timelineY));
+  uiComponents.add(new Button("sequencer", bX, timelineY + uiPadding));
+  uiComponents.add(new Input("sequenceLength", bX + 202, timelineY + uiPadding));
 }
 
 void drawUI() {
   if (showUI) {
+    // main control panel
     stroke(uiDarkBorder);
     fill(uiPanelBG);
-    rect(4, 4, 320, 485, 2);
+    rect(uiPadding, uiPadding, 313 + uiPadding * 2, 486, 2);
     
     for (UIComponent c : uiComponents) {
       c.draw();
@@ -127,7 +127,8 @@ class Slider extends UIComponent {
   
   void testClick() {
     int x = xPos + boxPos + boxXOff;
-    if (mouseX >= x && mouseX <= x + boxSize && mouseY >= yPos && mouseY <= yPos + boxSize) {
+    if (mouseX >= x && mouseX <= x + boxSize
+      && mouseY >= yPos && mouseY <= yPos + boxSize) {
       active = true;
       dragStartX = mouseX;
       boxStartX = boxPos;
@@ -185,7 +186,8 @@ class Button extends UIComponent {
   }
   
   void testClick() {
-    if (mouseX >= xPos && mouseX <= xPos + w && mouseY >= yPos && mouseY <= yPos + h) {
+    if (mouseX >= xPos && mouseX <= xPos + w
+      && mouseY >= yPos && mouseY <= yPos + h) {
       getSetting(name).advance();
     }
   }
@@ -235,7 +237,8 @@ class Input extends UIComponent {
   }
   
   void testClick() {
-    if (mouseX >= xPos && mouseX <= xPos + w && mouseY >= yPos && mouseY <= yPos + h) {
+    if (mouseX >= xPos && mouseX <= xPos + w
+      && mouseY >= yPos && mouseY <= yPos + h) {
       active = true;
     }
     else {
@@ -248,11 +251,12 @@ class Input extends UIComponent {
 // Timeline
 // ************************
 class Timeline extends UIComponent {
-  int trackXOffset = 100;
-  int trackYOffset = 35;
+  int trackXOff = 100;
+  int trackYOff = 20 + uiPadding * 2;
   int trackWidth = 600;
   int trackHeight = 30;
-  int trackPadding = 5;
+  int trackXPad = 5;
+  int trackYPad = 8;
   
   Timeline(String n, int x, int y) {
     super(n, x, y);
@@ -260,67 +264,73 @@ class Timeline extends UIComponent {
   
   void draw() {
     int numParams = sequenceParams.entrySet().size();
-    int trackX = xPos + trackXOffset;
-    int panelWidth = trackXOffset + trackWidth + 8;
+    int trackX = xPos + trackXOff;
     
     // panel background
     stroke(uiDarkBorder);
     fill(uiPanelBG);
-    rect(xPos - 4, yPos, panelWidth, trackYOffset + numParams * trackHeight, 2);
-    
-    
-    // draw track backgrounds before position marker
-    int i = 0;
-    fill(220);
-    stroke(uiLightBorder);
-    for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
-      int trackY = yPos + trackYOffset + i * trackHeight;
-      rect(trackX, trackY, trackWidth + 4, trackHeight);
-      i++;
-    }
-    
-    // position marker
-    fill(uiLightBorder);
-    noStroke();
-    int markerX = int(param("sequencePosition") / param("sequenceLength") * (trackWidth - 2));
-    rect(trackX + markerX, yPos + 28, 2, 7 + numParams * trackHeight, 2);
+    rect(xPos, yPos, trackXOff + trackWidth, trackYOff + numParams * trackHeight, 2);
     
     // parameter tracks
-    i = 0;
+    int i = 0;
     textAlign(LEFT, TOP);
     for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
-      int trackY = yPos + trackYOffset + i * trackHeight;
+      int trackTop = yPos + trackYOff + i * trackHeight;
+      int trackBottom = trackTop + trackHeight;
+      
+      // track background
+      fill(200);
+      stroke(uiLightBorder);
+      strokeWeight(1.8);
+      rect(trackX, trackTop, trackWidth - 1, trackHeight);
+      strokeWeight(1);
       
       // name box
       stroke(uiLightBorder);
-      fill(240);
-      rect(xPos - 4, trackY, trackXOffset + 4, trackHeight);
+      strokeWeight(1.8);
+      fill(185);
+      rect(xPos + 1, trackTop, trackXOff - 1, trackHeight);
+      strokeWeight(1);
+      
       // name text
       fill(uiTextBlack);
-      text(seqParam.getKey(), xPos, trackY + 7);
+      text(seqParam.getKey(), xPos + uiPadding, trackTop + 7);
       
-      // keyframes
+      // keyframe dots
       fill(uiKeyframe);
       int prevX = 0, prevY = 0;
       int j = 0;
       for (Keyframe k : seqParam.getValue()) {
-        int xOff = int(k.time / param("sequenceLength") * trackWidth);
+        float xPct = k.time / param("sequenceLength");
+        int xDist = int(xPct * (trackWidth - trackXPad * 2)) + trackXPad;
         float yPct = k.value / getSetting(seqParam.getKey()).maxVal;
-        int yOff = int(yPct * (trackHeight - trackPadding * 2)) + trackPadding;
+        int yDist = int(yPct * (trackHeight - trackYPad * 2)) + trackYPad;
         noStroke();
-        circle(trackX + xOff, trackY + yOff, 5);
+        circle(trackX + xDist, trackBottom - yDist, 5);
         stroke(uiKeyframe);
+        
+        // line connecting to previous keyframe
         if (j > 0) {
-          line(trackX + xOff, trackY + yOff, trackX + prevX, trackY + prevY);
+          line(trackX + xDist, trackBottom - yDist,
+            trackX + prevX, trackTop + trackHeight - prevY);
         }
+        // line extending to end of sequence from last keyframe
         if (j == seqParam.getValue().size() - 1 && k.time < param("sequenceLength")) {
-          line(trackX + xOff, trackY + yOff, trackX + trackWidth, trackY + yOff);
+          line(trackX + xDist, trackBottom - yDist,
+            trackX + trackWidth, trackBottom - yDist);
         }
-        prevX = xOff;
-        prevY = yOff;
+        prevX = xDist;
+        prevY = yDist;
         j++;
       }
       i++;
     }
+    
+    // position marker
+    fill(0);
+    noStroke();
+    float seqProg = param("sequencePosition") / param("sequenceLength");
+    int markerX = int(seqProg * (trackWidth - trackXPad * 2)) + trackXPad;
+    rect(trackX + markerX, yPos + 28, 1, 7 + numParams * trackHeight, 2);
   }
 }

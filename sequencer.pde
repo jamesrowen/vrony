@@ -20,7 +20,7 @@ void setupSequencer() {
   sequenceParams.get("speed").add(new Keyframe(10, .6));
   sequenceParams.put("pointOpacity", new ArrayList<Keyframe>());
   sequenceParams.get("pointOpacity").add(new Keyframe(0, .2));
-  sequenceParams.get("pointOpacity").add(new Keyframe(4, .5));
+  sequenceParams.get("pointOpacity").add(new Keyframe(4, 1));
   sequenceParams.get("pointOpacity").add(new Keyframe(6, 0));
   sequenceParams.get("pointOpacity").add(new Keyframe(8, .2));
   sequenceParams.put("ringSize", new ArrayList<Keyframe>());
@@ -28,6 +28,10 @@ void setupSequencer() {
   sequenceParams.get("ringSize").add(new Keyframe(4, 70));
   sequenceParams.get("ringSize").add(new Keyframe(6, 80));
   sequenceParams.get("ringSize").add(new Keyframe(10, 10));
+  sequenceParams.put("numRings", new ArrayList<Keyframe>());
+  sequenceParams.get("numRings").add(new Keyframe(0, 6));
+  sequenceParams.get("numRings").add(new Keyframe(4, 2));
+  sequenceParams.get("numRings").add(new Keyframe(10, 20));
 }
 
 void tickSequence(float tick) {
