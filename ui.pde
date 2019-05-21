@@ -6,6 +6,7 @@ int uiLightGray = 240;
 int uiDarkBorder = 120;
 int uiLightBorder = 135;
 int uiTextBlack = 0;
+float thickBorder = 1.8;
 color uiLightBlue = color(117, 218, 255);
 color uiPanelBG = color(220, 250);
 color uiKeyframe = color(255, 0, 0);
@@ -43,7 +44,7 @@ void setupUI() {
   int timelineY = 560;
   uiComponents.add(new Timeline("timeline", uiPadding, timelineY));
   uiComponents.add(new Button("sequencer", bX, timelineY + uiPadding));
-  uiComponents.add(new Input("sequenceLength", bX + 202, timelineY + uiPadding));
+  //uiComponents.add(new Input("sequenceLength", bX + 202, timelineY + uiPadding));
 }
 
 void drawUI() {
@@ -152,17 +153,17 @@ class Slider extends UIComponent {
     // update position if changed elsewhere (keyboard, automation)
     boxPos = int((s.value - s.minVal) / (s.maxVal - s.minVal) * sliderWidth);
     
-    // draw text
+    // name text
     fill(uiTextBlack);
     textAlign(RIGHT, TOP);
     text(name + "  " + nf(s.value, 0, 1), xPos, yPos);
     
-    // draw track
+    // slider track
     fill(uiDarkGray);
     stroke(uiLightBorder);
     rect(xPos + 5, yPos + boxSize - 3, sliderWidth + boxSize + 4, 5, 2);
     
-    // draw slider
+    // slider
     fill(uiLightGray);
     stroke(uiDarkBorder);
     if (active) {
@@ -251,81 +252,183 @@ class Input extends UIComponent {
 // Timeline
 // ************************
 class Timeline extends UIComponent {
-  int trackXOff = 100;
-  int trackYOff = 20 + uiPadding * 2;
-  int trackWidth = 600;
-  int trackHeight = 30;
-  int trackXPad = 5;
-  int trackYPad = 8;
+  // timeline seek
+  float seqDispStart = 0, seqDispLen = 10;
+  int seekBarX = 0, seekBarY = 0, seekBarHeight = 16;
+  int seekHandleX = 0, seekHandleWidth = 10;
+  boolean seekHandleActive = false;
+  int dragStartX = 0, handleStartX = 0;
+  
+  // automation lanes
+  int nameBoxWidth = 120;
+  int laneX = 0, laneYStart = 0;
+  int laneYOff = 20 + seekBarHeight + uiPadding * 2;
+  int laneWidth = 600, laneHeight = 30, laneYPad = 8;
+  
   
   Timeline(String n, int x, int y) {
     super(n, x, y);
+    seekBarX = xPos + nameBoxWidth;
+    seekBarY = yPos + 20 + uiPadding * 2;
+    laneX = xPos + nameBoxWidth;
+    laneYStart = yPos + laneYOff;
   }
   
   void draw() {
+    if (setting("sequencer") == 0) {
+      return;
+    }
     int numParams = sequenceParams.entrySet().size();
-    int trackX = xPos + trackXOff;
     
     // panel background
     stroke(uiDarkBorder);
     fill(uiPanelBG);
-    rect(xPos, yPos, trackXOff + trackWidth, trackYOff + numParams * trackHeight, 2);
+    rect(xPos, yPos, nameBoxWidth + laneWidth, laneYOff + numParams * laneHeight, 2);
     
-    // parameter tracks
+    // seek bar track
+    strokeWeight(thickBorder);
+    fill(uiDarkGray - 30);
+    stroke(uiLightBorder);
+    rect(seekBarX, seekBarY, laneWidth - 1, seekBarHeight, 2);
+    strokeWeight(1);
+    // seek handle
+    fill(uiLightGray - 10);
+    if (seekHandleActive) {
+      fill(uiLightBlue);
+    }
+    stroke(uiLightBorder);
+    rect(seekBarX + 2 + seekHandleX, seekBarY + 2, seekHandleWidth, seekBarHeight - 4);
+    
+    // automation lanes
     int i = 0;
     textAlign(LEFT, TOP);
     for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
-      int trackTop = yPos + trackYOff + i * trackHeight;
-      int trackBottom = trackTop + trackHeight;
+      int laneTop = laneYStart + i * laneHeight;
+      int laneBottom = laneTop + laneHeight;
       
-      // name and track boxes
+      // lane background
       stroke(uiLightBorder);
-      strokeWeight(1.8);
-      fill(190);
-      rect(xPos + 1, trackTop, trackXOff - 1, trackHeight);
-      fill(200);
-      rect(trackX, trackTop, trackWidth - 1, trackHeight);
+      strokeWeight(thickBorder);
+      fill(200 + (i % 2) * 10);
+      rect(laneX, laneTop, laneWidth - 1, laneHeight);
       strokeWeight(1);
       
-      // name text
-      fill(uiTextBlack);
-      text(seqParam.getKey(), xPos + uiPadding, trackTop + 7);
-      
-      // keyframe dots
+      // keyframe lines and dots
       fill(uiKeyframe);
-      int prevX = 0, prevY = 0;
-      int j = 0;
-      for (Keyframe k : seqParam.getValue()) {
-        float xPct = k.time / param("sequenceLength");
-        int xDist = int(xPct * (trackWidth - trackXPad * 2)) + trackXPad;
-        float yPct = k.value / getSetting(seqParam.getKey()).maxVal;
-        int yDist = int(yPct * (trackHeight - trackYPad * 2)) + trackYPad;
-        noStroke();
-        circle(trackX + xDist, trackBottom - yDist, 5);
+      ArrayList<Keyframe> keyframes = seqParam.getValue();
+      
+      // find range of currently visible keyframes
+      int firstVisibleKF = 0, lastVisibleKF = 0;
+      while (firstVisibleKF < keyframes.size() && keyframes.get(firstVisibleKF).time < seqDispStart) {
+        firstVisibleKF++;
+      }
+      lastVisibleKF = firstVisibleKF;
+      while (lastVisibleKF < keyframes.size() && keyframes.get(lastVisibleKF).time < seqDispStart + seqDispLen) {
+        lastVisibleKF++;
+      }
+      lastVisibleKF--;
+      
+      if (firstVisibleKF > lastVisibleKF) {
         stroke(uiKeyframe);
+        int x1 = getTimelineX(keyframes.get(lastVisibleKF).time);
+        int y1 = getTimelineY(keyframes.get(lastVisibleKF).value / getSetting(seqParam.getKey()).maxVal);
+        int x2 = laneWidth;
+        int y2 = y1;
+        if (firstVisibleKF < keyframes.size()) {
+          x2 = getTimelineX(keyframes.get(firstVisibleKF).time);
+          y2 = getTimelineY(keyframes.get(firstVisibleKF).value / getSetting(seqParam.getKey()).maxVal);
+        }
+        y1 -= x1 / float(x2 - x1) * (y2 - y1);
+        y2 -= (x2 - laneWidth) / float(x2 - x1) * (y2 - y1);
+        
+        line(laneX, laneBottom - y1, laneX + laneWidth, laneBottom - y2);
+        
+      }
+      
+      for (int j = firstVisibleKF; j < lastVisibleKF + 1; j++) {
+        int x1 = getTimelineX(keyframes.get(j).time);
+        int y1 = getTimelineY(keyframes.get(j).value / getSetting(seqParam.getKey()).maxVal);
+        
+        // keyframe dot
+        noStroke();
+        circle(laneX + x1, laneBottom - y1, 5);
         
         // line connecting to previous keyframe
+        stroke(uiKeyframe);
         if (j > 0) {
-          line(trackX + xDist, trackBottom - yDist,
-            trackX + prevX, trackTop + trackHeight - prevY);
+          int x0 = getTimelineX(keyframes.get(j - 1).time);
+          int y0 = getTimelineY(keyframes.get(j - 1).value / getSetting(seqParam.getKey()).maxVal);
+          // if previous keyframe is off-screen, truncate line
+          if (j == firstVisibleKF) {
+            y0 -= x0 / float(x1 - x0) * (y1 - y0);
+            x0 = 0;
+          }
+          line(laneX + x1, laneBottom - y1, laneX + x0, laneBottom - y0);
         }
-        // line extending to end of sequence from last keyframe
-        if (j == seqParam.getValue().size() - 1 && k.time < param("sequenceLength")) {
-          line(trackX + xDist, trackBottom - yDist,
-            trackX + trackWidth, trackBottom - yDist);
+          
+        // if final keyframe, extend flat line to end of timeline
+        if (j == keyframes.size() - 1) {
+          line(laneX + x1, laneBottom - y1, laneX + laneWidth, laneBottom - y1);
         }
-        prevX = xDist;
-        prevY = yDist;
-        j++;
+        // if there is a further keyframe off-screen, extend toward it
+        else if (j == lastVisibleKF) {
+          int x2 = getTimelineX(keyframes.get(j + 1).time);
+          int y2 = getTimelineY(keyframes.get(j + 1).value / getSetting(seqParam.getKey()).maxVal);
+          y2 -= (x2 - laneWidth) / float(x1 - x2) * (y1 - y2);
+          x2 = laneWidth;
+          
+          line(laneX + x1, laneBottom - y1, laneX + x2, laneBottom - y2);
+        }
       }
+      
+      // name background
+      stroke(uiLightBorder);
+      strokeWeight(thickBorder);
+      fill(200 + (i % 2) * 10);
+      rect(xPos + 1, laneTop, nameBoxWidth - 1, laneHeight);
+      strokeWeight(1);
+      // name text
+      fill(uiTextBlack);
+      text(seqParam.getKey(), xPos + uiPadding, laneTop + 7);
+      
       i++;
     }
     
     // position marker
-    fill(0);
-    noStroke();
-    float seqProg = param("sequencePosition") / param("sequenceLength");
-    int markerX = int(seqProg * (trackWidth - trackXPad * 2)) + trackXPad;
-    rect(trackX + markerX, yPos + 28, 1, 7 + numParams * trackHeight, 2);
+    if (param("sequencePosition") > seqDispStart && param("sequencePosition") < seqDispStart + seqDispLen) {
+      fill(0);
+      noStroke();
+      int markerX = getTimelineX(param("sequencePosition"));
+      rect(laneX + markerX, yPos + laneYStart, 1, numParams * laneHeight);
+    }
+  }
+  
+  void testClick() {
+    if (mouseX >= seekBarX + seekHandleX && mouseX <= seekBarX + seekHandleX + seekHandleWidth
+      && mouseY >= seekBarY && mouseY <= seekBarY + seekBarHeight) {
+      seekHandleActive = true;
+      dragStartX = mouseX;
+      handleStartX = seekHandleX;
+    }
+  }
+  
+  void doDrag() {
+    if (seekHandleActive) {
+      int maxPos = laneWidth - 4 - seekHandleWidth;
+      seekHandleX = min(max(handleStartX + mouseX - dragStartX, 0), maxPos);
+      seqDispStart = lerp(0, param("sequenceLength") - seqDispLen, seekHandleX / float(maxPos));
+    }
+  }
+  
+  void doRelease() {
+    seekHandleActive = false;
+  }
+  
+  int getTimelineX(float time) {
+    return int((time - seqDispStart) / seqDispLen * laneWidth);
+  }
+  
+  int getTimelineY(float value) {
+    return int(value * (laneHeight - laneYPad * 2)) + laneYPad;
   }
 }
