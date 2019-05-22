@@ -6,11 +6,12 @@ class Timeline extends UIComponent {
   boolean seekHandleActive = false;
   int dragStartX = 0, handleStartX = 0;
   
-  // grid numbers
+  // grid
+  float gridStep = .5;
+  int gridHeight = 0;
+  int gridLabelStep = 2;
   int gridLabelX = 0, gridLabelY = 0, gridLabelHeight = 18;
   int gridLabelXOff = 4;
-  int gridLabelStep = 2;
-  float gridStep = .5;
   
   // automation lanes
   int nameBoxWidth = 120;
@@ -24,19 +25,33 @@ class Timeline extends UIComponent {
     gridLabelY = seekBarY + seekBarHeight;
     laneX = xPos + nameBoxWidth;
     laneYStart = yPos + laneYOff;
+    gridHeight = sequenceParams.entrySet().size() * laneHeight;
   }
   
   void draw() {
     if (setting("sequencer") == 0) {
       return;
     }
-    int gridHeight = sequenceParams.entrySet().size() * laneHeight;
     
     // panel background
     stroke(uiDarkBorder);
     fill(uiPanelBG);
     rect(xPos, yPos, nameBoxWidth + laneWidth, laneYOff + gridHeight, 2);
     
+    drawSeekBar();
+    drawGrid();
+    drawAutomationLanes();
+    
+    // position marker
+    if (param("sequencePosition") > seqDispStart && param("sequencePosition") < seqDispStart + seqDispLen) {
+      fill(0);
+      noStroke();
+      int markerX = getTimelineX(param("sequencePosition"));
+      rect(laneX + markerX, gridLabelY, 1, gridHeight + gridLabelHeight);
+    }
+  }
+  
+  void drawSeekBar() {
     // seek bar track
     strokeWeight(thickBorder);
     fill(uiDarkGray - 30);
@@ -50,30 +65,29 @@ class Timeline extends UIComponent {
     }
     noStroke();
     rect(laneX + 4 + seekHandleX, seekBarY + 4, seekHandleWidth, seekBarHeight - 7, 2);
+  }
+  
+  void drawGrid() {
+    strokeWeight(thickBorder);
+    // grid label background
+    stroke(uiLightBorder);
+    fill(uiLightBorder + 20);
+    rect(laneX, gridLabelY, laneWidth - 1, gridLabelHeight);
     
     // lane backgrounds
     for (int i = 0; i < sequenceParams.size(); i++) {
-      // lane background
-      stroke(uiLightBorder);
-      strokeWeight(thickBorder);
       fill(200 + (i % 2) * 10);
       rect(laneX, laneYStart + i * laneHeight, laneWidth - 1, laneHeight);
-      strokeWeight(1);
     }
-    
-    // grid label background
-    strokeWeight(thickBorder);
-    fill(uiLightBorder + 20);
-    rect(laneX, gridLabelY, laneWidth - 1, gridLabelHeight);
     strokeWeight(1);
     
-    // grid lines and numbers
+    // grid lines and labels
     textAlign(LEFT, TOP);
     textSize(10);
     float curStep = ceil(seqDispStart / gridStep) * gridStep;
     while (curStep < seqDispStart + seqDispLen) {
       noStroke();
-      // main grid line
+      // primary grid line
       if (curStep % gridLabelStep == 0) {
         fill(uiDarkBorder + 10);
         rect(laneX + getTimelineX(curStep), gridLabelY + 10, 1, gridLabelHeight - 10 + gridHeight);
@@ -91,20 +105,19 @@ class Timeline extends UIComponent {
       curStep += gridStep;
     }
     textSize(uiTextSize);
-    
-    // automation lanes
+  }
+  
+  void drawAutomationLanes() {
     int i = 0;
     textAlign(LEFT, TOP);
     for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
       int laneTop = laneYStart + i * laneHeight;
       int laneBottom = laneTop + laneHeight;
-      
-      // keyframe lines and dots
       fill(uiKeyframe);
       strokeWeight(1.5);
-      ArrayList<Keyframe> keyframes = seqParam.getValue();
       
       // find range of currently visible keyframes
+      ArrayList<Keyframe> keyframes = seqParam.getValue();
       int firstVisibleKF = 0, lastVisibleKF = 0;
       while (firstVisibleKF < keyframes.size() && keyframes.get(firstVisibleKF).time < seqDispStart) {
         firstVisibleKF++;
@@ -133,6 +146,7 @@ class Timeline extends UIComponent {
         
       }
       
+      // draw visible keyframes
       for (int j = firstVisibleKF; j < lastVisibleKF + 1; j++) {
         int x1 = getTimelineX(keyframes.get(j).time);
         int y1 = getTimelineY(keyframes.get(j).value / getSetting(seqParam.getKey()).maxVal);
@@ -169,7 +183,7 @@ class Timeline extends UIComponent {
         }
       }
       
-      // name background
+      // draw parameter name box
       stroke(uiLightBorder);
       strokeWeight(thickBorder);
       fill(200 + (i % 2) * 10);
@@ -180,14 +194,6 @@ class Timeline extends UIComponent {
       text(seqParam.getKey(), xPos + uiPadding, laneTop + 16);
       
       i++;
-    }
-    
-    // position marker
-    if (param("sequencePosition") > seqDispStart && param("sequencePosition") < seqDispStart + seqDispLen) {
-      fill(0);
-      noStroke();
-      int markerX = getTimelineX(param("sequencePosition"));
-      rect(laneX + markerX, gridLabelY, 1, gridHeight + gridLabelHeight);
     }
   }
   
