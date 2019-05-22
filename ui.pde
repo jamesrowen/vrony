@@ -1,18 +1,21 @@
 ArrayList<UIComponent> uiComponents = new ArrayList<UIComponent>();
 
-int uiPadding = 5;
-int uiDarkGray = 210;
-int uiLightGray = 240;
+// ui colors
+int uiTextBlack = 0;
 int uiDarkBorder = 120;
 int uiLightBorder = 135;
-int uiTextBlack = 0;
-float thickBorder = 1.8;
+int uiDarkGray = 210;
+int uiLightGray = 240;
 color uiLightBlue = color(117, 218, 255);
 color uiPanelBG = color(220, 250);
 color uiKeyframe = color(255, 0, 0);
 
+int uiTextSize = 12;
+int uiPadding = 5;
+float thickBorder = 3;
+
 void setupUI() {
-  textSize(12);
+  textSize(uiTextSize);
   
   // sliders
   int sliderX = 141 + uiPadding;
@@ -254,22 +257,27 @@ class Input extends UIComponent {
 class Timeline extends UIComponent {
   // timeline seek
   float seqDispStart = 0, seqDispLen = 10;
-  int seekBarX = 0, seekBarY = 0, seekBarHeight = 16;
-  int seekHandleX = 0, seekHandleWidth = 10;
+  int seekBarY = 0, seekBarHeight = 18;
+  int seekHandleX = 0, seekHandleWidth = 14;
   boolean seekHandleActive = false;
   int dragStartX = 0, handleStartX = 0;
+  
+  // grid numbers
+  int gridLabelX = 0, gridLabelY = 0, gridLabelHeight = 18;
+  int gridLabelXOff = 4;
+  int gridLabelStep = 1;
+  float gridStep = .5;
   
   // automation lanes
   int nameBoxWidth = 120;
   int laneX = 0, laneYStart = 0;
-  int laneYOff = 20 + seekBarHeight + uiPadding * 2;
-  int laneWidth = 600, laneHeight = 30, laneYPad = 8;
-  
+  int laneYOff = seekBarHeight + gridLabelHeight + 2;
+  int laneWidth = 700, laneHeight = 34, laneYPad = 8;
   
   Timeline(String n, int x, int y) {
     super(n, x, y);
-    seekBarX = xPos + nameBoxWidth;
-    seekBarY = yPos + 20 + uiPadding * 2;
+    seekBarY = yPos + 2;
+    gridLabelY = seekBarY + seekBarHeight;
     laneX = xPos + nameBoxWidth;
     laneYStart = yPos + laneYOff;
   }
@@ -289,15 +297,56 @@ class Timeline extends UIComponent {
     strokeWeight(thickBorder);
     fill(uiDarkGray - 30);
     stroke(uiLightBorder);
-    rect(seekBarX, seekBarY, laneWidth - 1, seekBarHeight, 2);
+    rect(laneX, seekBarY, laneWidth - 1, seekBarHeight, 2);
     strokeWeight(1);
     // seek handle
     fill(uiLightGray - 10);
     if (seekHandleActive) {
       fill(uiLightBlue);
     }
-    stroke(uiLightBorder);
-    rect(seekBarX + 2 + seekHandleX, seekBarY + 2, seekHandleWidth, seekBarHeight - 4);
+    noStroke();
+    rect(laneX + 4 + seekHandleX, seekBarY + 4, seekHandleWidth, seekBarHeight - 7, 2);
+    
+    // lane backgrounds
+    for (int i = 0; i < sequenceParams.size(); i++) {
+      // lane background
+      stroke(uiLightBorder);
+      strokeWeight(thickBorder);
+      fill(200 + (i % 2) * 10);
+      rect(laneX, laneYStart + i * laneHeight, laneWidth - 1, laneHeight);
+      strokeWeight(1);
+    }
+    
+    // grid label background
+    strokeWeight(thickBorder);
+    fill(uiLightBorder + 20);
+    rect(laneX, gridLabelY, laneWidth - 1, gridLabelHeight);
+    strokeWeight(1);
+    
+    // grid lines and numbers
+    textAlign(LEFT, TOP);
+    textSize(10);
+    float curStep = ceil(seqDispStart / gridStep) * gridStep;
+    while (curStep < seqDispStart + seqDispLen) {
+      noStroke();
+      // main grid line
+      if (curStep % gridLabelStep == 0) {
+        fill(uiDarkBorder + 10);
+        rect(laneX + getTimelineX(curStep), gridLabelY + 10, 1, gridLabelHeight - 10 + numParams * laneHeight);
+        // grid number
+        if ((getTimelineX(curStep) + gridLabelXOff + 15 <= laneWidth)) {
+          fill(uiTextBlack);
+          text(int(curStep), laneX + getTimelineX(curStep) + gridLabelXOff, gridLabelY + 5);
+        }
+      }
+      // secondary grid line
+      else {
+        fill(uiLightBorder + 10, 128);
+        rect(laneX + getTimelineX(curStep), gridLabelY + gridLabelHeight, 1, numParams * laneHeight);
+      }
+      curStep += gridStep;
+    }
+    textSize(uiTextSize);
     
     // automation lanes
     int i = 0;
@@ -306,15 +355,9 @@ class Timeline extends UIComponent {
       int laneTop = laneYStart + i * laneHeight;
       int laneBottom = laneTop + laneHeight;
       
-      // lane background
-      stroke(uiLightBorder);
-      strokeWeight(thickBorder);
-      fill(200 + (i % 2) * 10);
-      rect(laneX, laneTop, laneWidth - 1, laneHeight);
-      strokeWeight(1);
-      
       // keyframe lines and dots
       fill(uiKeyframe);
+      strokeWeight(1.5);
       ArrayList<Keyframe> keyframes = seqParam.getValue();
       
       // find range of currently visible keyframes
@@ -328,6 +371,7 @@ class Timeline extends UIComponent {
       }
       lastVisibleKF--;
       
+      // if no keyframes visible, interpolate between two nearest
       if (firstVisibleKF > lastVisibleKF) {
         stroke(uiKeyframe);
         int x1 = getTimelineX(keyframes.get(lastVisibleKF).time);
@@ -389,7 +433,7 @@ class Timeline extends UIComponent {
       strokeWeight(1);
       // name text
       fill(uiTextBlack);
-      text(seqParam.getKey(), xPos + uiPadding, laneTop + 7);
+      text(seqParam.getKey(), xPos + uiPadding, laneTop + 16);
       
       i++;
     }
@@ -399,12 +443,12 @@ class Timeline extends UIComponent {
       fill(0);
       noStroke();
       int markerX = getTimelineX(param("sequencePosition"));
-      rect(laneX + markerX, yPos + laneYStart, 1, numParams * laneHeight);
+      rect(laneX + markerX, gridLabelY, 1, numParams * laneHeight + gridLabelHeight);
     }
   }
   
   void testClick() {
-    if (mouseX >= seekBarX + seekHandleX && mouseX <= seekBarX + seekHandleX + seekHandleWidth
+    if (mouseX >= laneX + seekHandleX && mouseX <= laneX + seekHandleX + seekHandleWidth
       && mouseY >= seekBarY && mouseY <= seekBarY + seekBarHeight) {
       seekHandleActive = true;
       dragStartX = mouseX;
@@ -414,7 +458,7 @@ class Timeline extends UIComponent {
   
   void doDrag() {
     if (seekHandleActive) {
-      int maxPos = laneWidth - 4 - seekHandleWidth;
+      int maxPos = laneWidth - 8 - seekHandleWidth;
       seekHandleX = min(max(handleStartX + mouseX - dragStartX, 0), maxPos);
       seqDispStart = lerp(0, param("sequenceLength") - seqDispLen, seekHandleX / float(maxPos));
     }
