@@ -105,7 +105,7 @@ class UIComponent {
     yPos = y;
   }
   
-  void testClick() {}
+  boolean testClick() { return false; }
   void doDrag() {}
   void doRelease() {}
   void draw() {}
@@ -130,14 +130,16 @@ class Slider extends UIComponent {
     boxPos = int((s.value - s.minVal) / (s.maxVal - s.minVal) * sliderWidth);
   }
   
-  void testClick() {
+  boolean testClick() {
     int x = xPos + boxPos + boxXOff;
     if (mouseX >= x && mouseX <= x + boxSize
       && mouseY >= yPos && mouseY <= yPos + boxSize) {
       active = true;
       dragStartX = mouseX;
       boxStartX = boxPos;
+      return true;
     }
+    return false;
   }
   
   void doDrag() {
@@ -190,11 +192,13 @@ class Button extends UIComponent {
     super(n, x, y);
   }
   
-  void testClick() {
+  boolean testClick() {
     if (mouseX >= xPos && mouseX <= xPos + w
       && mouseY >= yPos && mouseY <= yPos + h) {
       getSetting(name).advance();
+      return true;
     }
+    return false;
   }
   
   void draw() {
@@ -241,13 +245,15 @@ class Input extends UIComponent {
     text((int)s.value, xPos + 10, yPos + 3);
   }
   
-  void testClick() {
+  boolean testClick() {
     if (mouseX >= xPos && mouseX <= xPos + w
       && mouseY >= yPos && mouseY <= yPos + h) {
       active = true;
+      return true;
     }
     else {
       active = false;
+      return false;
     }
   }
 }

@@ -1,9 +1,10 @@
 class Timeline extends UIComponent {
+  // colors
   int timelineGray = 170;
   int timelineGrayDiff = 10;
   
   // timeline seek
-  float seqDispStart = 0, seqDispLen = 10;
+  float tlViewStart = 0, tlViewLength = 10;
   int seekBarY = 0, seekBarHeight = 18;
   int seekHandleX = 0, seekHandleWidth = 14;
   boolean seekHandleActive = false;
@@ -20,7 +21,7 @@ class Timeline extends UIComponent {
   int nameBoxWidth = 120;
   int laneX = 0, laneYStart = 0;
   int laneYOff = seekBarHeight + gridLabelHeight + 2;
-  int laneWidth = 700, laneHeight = 34, laneYPad = 8;
+  int laneWidth = 700, laneHeight = 34, laneYPad = 6;
   HashMap<String, ArrayList<KeyframeHandle>> kfHandles;
   
   Timeline(String n, int x, int y) {
@@ -50,7 +51,7 @@ class Timeline extends UIComponent {
     drawParamNames();
     
     // position marker
-    if (param("sequencePosition") > seqDispStart && param("sequencePosition") < seqDispStart + seqDispLen) {
+    if (param("sequencePosition") > tlViewStart && param("sequencePosition") < tlViewStart + tlViewLength) {
       fill(0);
       noStroke();
       int markerX = getTimelineX(param("sequencePosition"));
@@ -91,8 +92,8 @@ class Timeline extends UIComponent {
     // grid lines and labels
     textAlign(LEFT, TOP);
     textSize(10);
-    float curStep = ceil(seqDispStart / gridStep) * gridStep;
-    while (curStep < seqDispStart + seqDispLen) {
+    float curStep = ceil(tlViewStart / gridStep) * gridStep;
+    while (curStep < tlViewStart + tlViewLength) {
       noStroke();
       // primary grid line
       if (curStep % gridLabelStep == 0) {
@@ -202,25 +203,44 @@ class Timeline extends UIComponent {
     strokeWeight(1);
   }
   
-  void testClick() {
+  boolean testClick() {
     if (mouseX >= laneX + seekHandleX && mouseX <= laneX + seekHandleX + seekHandleWidth
       && mouseY >= seekBarY && mouseY <= seekBarY + seekBarHeight) {
       seekHandleActive = true;
       dragStartX = mouseX;
       handleStartX = seekHandleX;
+      return true;
     }
     for (Map.Entry<String, ArrayList<KeyframeHandle>> kf : kfHandles.entrySet()) {
       for (KeyframeHandle h : kf.getValue()) {
-        h.testClick();
+        if (h.testClick()) {
+          return true;
+        }
       }
     }
+    
+    int laneTop = laneYStart;
+    for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
+      if (mouseX > laneX && mouseX < laneX + laneWidth && mouseY >= laneTop + laneYPad
+        && mouseY <= laneTop + laneHeight - laneYPad) {
+        int index = 0;
+        while (seqParam.getValue().get(index).time < getSeqTime(mouseX)) {
+          index++;
+        }
+        seqParam.getValue().add(index, new Keyframe(getSeqTime(mouseX), getSeqVal(mouseY, laneTop) * getSetting(seqParam.getKey()).maxVal));
+        populateVisibleKeyframes();
+        return true;
+      }
+      laneTop += laneHeight;
+    }
+    return false;
   }
   
   void doDrag() {
     if (seekHandleActive) {
       int maxPos = laneWidth - 8 - seekHandleWidth;
       seekHandleX = min(max(handleStartX + mouseX - dragStartX, 0), maxPos);
-      seqDispStart = lerp(0, param("sequenceLength") - seqDispLen, seekHandleX / float(maxPos));
+      tlViewStart = lerp(0, param("sequenceLength") - tlViewLength, seekHandleX / float(maxPos));
       populateVisibleKeyframes();
     }
     for (Map.Entry<String, ArrayList<KeyframeHandle>> kf : kfHandles.entrySet()) {
@@ -249,11 +269,11 @@ class Timeline extends UIComponent {
       // find range of currently visible keyframes
       ArrayList<Keyframe> keyframes = seqParam.getValue();
       int firstVisibleKF = 0, lastVisibleKF = 0;
-      while (firstVisibleKF < keyframes.size() && keyframes.get(firstVisibleKF).time < seqDispStart) {
+      while (firstVisibleKF < keyframes.size() && keyframes.get(firstVisibleKF).time < tlViewStart) {
         firstVisibleKF++;
       }
       lastVisibleKF = firstVisibleKF;
-      while (lastVisibleKF < keyframes.size() && keyframes.get(lastVisibleKF).time < seqDispStart + seqDispLen) {
+      while (lastVisibleKF < keyframes.size() && keyframes.get(lastVisibleKF).time < tlViewStart + tlViewLength) {
         lastVisibleKF++;
       }
       firstVisibleKF--;
@@ -277,11 +297,19 @@ class Timeline extends UIComponent {
   }
   
   int getTimelineX(float time) {
-    return int((time - seqDispStart) / seqDispLen * laneWidth);
+    return int((time - tlViewStart) / tlViewLength * laneWidth);
   }
   
   int getTimelineY(float value) {
     return int(value * (laneHeight - laneYPad * 2)) + laneYPad;
+  }
+  
+  float getSeqTime(int screenX) {
+    return (screenX - laneX) / float(laneWidth) * tlViewLength + tlViewStart; 
+  }
+  
+  float getSeqVal(int screenY, int laneTop) {
+    return 1 - (screenY - laneTop - laneYPad) / float(laneHeight - laneYPad * 2);
   }
 }
 
@@ -314,13 +342,15 @@ class KeyframeHandle extends UIComponent {
     circle(xPos, yPos, radius);
   }
   
-  void testClick() {
+  boolean testClick() {
     if (mouseX >= xPos - radius && mouseX <= xPos + radius
       && mouseY >= yPos - radius && mouseY <= yPos + radius) {
       active = true;
       dragStartY = mouseY;
       handleStartY = yPos;
+      return true;
     }
+    return false;
   }
   
   void doDrag() {
