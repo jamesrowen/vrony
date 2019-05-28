@@ -1,4 +1,7 @@
 class Timeline extends UIComponent {
+  int timelineGray = 170;
+  int timelineGrayDiff = 10;
+  
   // timeline seek
   float seqDispStart = 0, seqDispLen = 10;
   int seekBarY = 0, seekBarHeight = 18;
@@ -18,6 +21,7 @@ class Timeline extends UIComponent {
   int laneX = 0, laneYStart = 0;
   int laneYOff = seekBarHeight + gridLabelHeight + 2;
   int laneWidth = 700, laneHeight = 34, laneYPad = 8;
+  HashMap<String, ArrayList<KeyframeHandle>> kfHandles;
   
   Timeline(String n, int x, int y) {
     super(n, x, y);
@@ -26,6 +30,7 @@ class Timeline extends UIComponent {
     laneX = xPos + nameBoxWidth;
     laneYStart = yPos + laneYOff;
     gridHeight = sequenceParams.entrySet().size() * laneHeight;
+    populateVisibleKeyframes();
   }
   
   void draw() {
@@ -40,7 +45,9 @@ class Timeline extends UIComponent {
     
     drawSeekBar();
     drawGrid();
-    drawAutomationLanes();
+    drawAutomationLines();
+    drawKeyframeHandles();
+    drawParamNames();
     
     // position marker
     if (param("sequencePosition") > seqDispStart && param("sequencePosition") < seqDispStart + seqDispLen) {
@@ -71,12 +78,12 @@ class Timeline extends UIComponent {
     strokeWeight(thickBorder);
     // grid label background
     stroke(uiLightBorder);
-    fill(uiLightBorder + 20);
+    fill(uiLightBorder + 10);
     rect(laneX, gridLabelY, laneWidth - 1, gridLabelHeight);
     
     // lane backgrounds
     for (int i = 0; i < sequenceParams.size(); i++) {
-      fill(200 + (i % 2) * 10);
+      fill(timelineGray + (i % 2) * timelineGrayDiff);
       rect(laneX, laneYStart + i * laneHeight, laneWidth - 1, laneHeight);
     }
     strokeWeight(1);
@@ -99,7 +106,7 @@ class Timeline extends UIComponent {
       }
       // secondary grid line
       else {
-        fill(uiLightBorder + 10, 128);
+        fill(uiLightBorder + 10, 100);
         rect(laneX + getTimelineX(curStep), gridLabelY + gridLabelHeight, 1, gridHeight);
       }
       curStep += gridStep;
@@ -107,14 +114,137 @@ class Timeline extends UIComponent {
     textSize(uiTextSize);
   }
   
-  void drawAutomationLanes() {
-    int i = 0;
+  void drawAutomationLines() {
+    fill(kfColor);
+    strokeWeight(kfStrokeWeight);
+    stroke(kfColor);
+    
+    for (Map.Entry<String, ArrayList<KeyframeHandle>> paramRow : kfHandles.entrySet()) {
+      ArrayList<KeyframeHandle> keyframeRow = paramRow.getValue();
+      
+      // if no visible keyframes, draw line connecting nearest ones outside the viewport
+      if (keyframeRow.size() <= 2) {
+        int x1 = keyframeRow.get(0).xPos;
+        int y1 = keyframeRow.get(0).yPos;
+        // default assumes no keyframes past viewport
+        int x2 = laneX + laneWidth;
+        int y2 = y1;
+        // update if there is one
+        if (keyframeRow.get(1).xPos - laneX > -1) {
+          x2 = keyframeRow.get(1).xPos;
+          y2 = keyframeRow.get(1).yPos;
+        }
+        // truncate line to viewport
+        y1 -= (x1 - laneX) / float(x2 - x1) * (y2 - y1);
+        y2 -= (x2 - laneX - laneWidth) / float(x2 - x1) * (y2 - y1);
+        line(laneX, y1, laneX + laneWidth, y2);
+      }
+      // loop through visible keyframes and draw lines between them
+      else {
+        for (int j = 1; j < keyframeRow.size() - 1; j++) {
+          KeyframeHandle k0 = keyframeRow.get(j - 1);
+          KeyframeHandle k1 = keyframeRow.get(j);
+          int x0 = k0.xPos;
+          int y0 = k0.yPos;
+          // line connecting to previous keyframe
+          if (k0.xPos < laneX) {
+            y0 -= (x0 - laneX) / float(k1.xPos - x0) * (k1.yPos - y0);
+            x0 = laneX;
+          }
+          line(x0, y0, k1.xPos, k1.yPos);
+          
+          // last visible keyframe
+          if (j == keyframeRow.size() - 2) {
+            // if final keyframe, extend flat line to end of viewport
+            if (keyframeRow.get(j + 1).xPos - laneX == -1) {
+              line(k1.xPos, k1.yPos, laneX + laneWidth, k1.yPos);
+            }
+            // if there is a further keyframe, extend line towards it
+            else {
+              KeyframeHandle k2 = keyframeRow.get(j + 1);
+              int y2 = k2.yPos - int((k2.xPos - laneX - laneWidth) / float(k1.xPos - k2.xPos) * (k1.yPos - k2.yPos));
+              line(k1.xPos, k1.yPos, laneX + laneWidth, y2);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  void drawKeyframeHandles() {
+    fill(timelineGray + timelineGrayDiff / 2);
+    strokeWeight(kfStrokeWeight);
+    for (Map.Entry<String, ArrayList<KeyframeHandle>> paramRow : kfHandles.entrySet()) {
+      for (int j = 1; j < paramRow.getValue().size() - 1; j++) {
+          paramRow.getValue().get(j).draw();
+      }
+    }
+    strokeWeight(1);
+  }
+  
+  void drawParamNames() {
     textAlign(LEFT, TOP);
-    for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
+    stroke(uiLightBorder);
+    strokeWeight(thickBorder);
+    
+    int i = 0;
+    for (Map.Entry<String, ArrayList<KeyframeHandle>> paramRow : kfHandles.entrySet()) {
       int laneTop = laneYStart + i * laneHeight;
-      int laneBottom = laneTop + laneHeight;
-      fill(uiKeyframe);
-      strokeWeight(1.5);
+      // parameter name box
+      fill(timelineGray + 20 + (i % 2) * timelineGrayDiff);
+      rect(xPos + 1, laneTop, nameBoxWidth - 1, laneHeight);
+      // name text
+      fill(uiTextBlack);
+      text(paramRow.getKey(), xPos + uiPadding, laneTop + 16);
+      
+      i++;
+    }
+    strokeWeight(1);
+  }
+  
+  void testClick() {
+    if (mouseX >= laneX + seekHandleX && mouseX <= laneX + seekHandleX + seekHandleWidth
+      && mouseY >= seekBarY && mouseY <= seekBarY + seekBarHeight) {
+      seekHandleActive = true;
+      dragStartX = mouseX;
+      handleStartX = seekHandleX;
+    }
+    for (Map.Entry<String, ArrayList<KeyframeHandle>> kf : kfHandles.entrySet()) {
+      for (KeyframeHandle h : kf.getValue()) {
+        h.testClick();
+      }
+    }
+  }
+  
+  void doDrag() {
+    if (seekHandleActive) {
+      int maxPos = laneWidth - 8 - seekHandleWidth;
+      seekHandleX = min(max(handleStartX + mouseX - dragStartX, 0), maxPos);
+      seqDispStart = lerp(0, param("sequenceLength") - seqDispLen, seekHandleX / float(maxPos));
+      populateVisibleKeyframes();
+    }
+    for (Map.Entry<String, ArrayList<KeyframeHandle>> kf : kfHandles.entrySet()) {
+      for (KeyframeHandle h : kf.getValue()) {
+        h.doDrag();
+      }
+    }
+  }
+  
+  void doRelease() {
+    seekHandleActive = false;
+    for (Map.Entry<String, ArrayList<KeyframeHandle>> kf : kfHandles.entrySet()) {
+      for (KeyframeHandle h : kf.getValue()) {
+        h.doRelease();
+      }
+    }
+  }
+  
+  void populateVisibleKeyframes() {
+    kfHandles = new HashMap<String, ArrayList<KeyframeHandle>>();
+    int laneBottom = laneYStart + laneHeight;
+    
+    for (Map.Entry<String, ArrayList<Keyframe>> seqParam : sequenceParams.entrySet()) {
+      ArrayList<KeyframeHandle> temp = new ArrayList<KeyframeHandle>();
       
       // find range of currently visible keyframes
       ArrayList<Keyframe> keyframes = seqParam.getValue();
@@ -126,96 +256,24 @@ class Timeline extends UIComponent {
       while (lastVisibleKF < keyframes.size() && keyframes.get(lastVisibleKF).time < seqDispStart + seqDispLen) {
         lastVisibleKF++;
       }
-      lastVisibleKF--;
+      firstVisibleKF--;
       
-      // if no keyframes visible, interpolate between two nearest
-      if (firstVisibleKF > lastVisibleKF) {
-        stroke(uiKeyframe);
-        int x1 = getTimelineX(keyframes.get(lastVisibleKF).time);
-        int y1 = getTimelineY(keyframes.get(lastVisibleKF).value / getSetting(seqParam.getKey()).maxVal);
-        int x2 = laneWidth;
-        int y2 = y1;
-        if (firstVisibleKF < keyframes.size()) {
-          x2 = getTimelineX(keyframes.get(firstVisibleKF).time);
-          y2 = getTimelineY(keyframes.get(firstVisibleKF).value / getSetting(seqParam.getKey()).maxVal);
+      // include the keyframes just before and after the visible range (for drawing lines to them).
+      // if either does not exist, set a sentinel keyframe with position (-1 ,-1)
+      for (int i = firstVisibleKF; i < lastVisibleKF + 1; i++) {
+        int kfX = -1, kfY = -1;
+        if (i > -1 && i < keyframes.size()) {
+          kfX = getTimelineX(keyframes.get(i).time);
+          kfY = getTimelineY(keyframes.get(i).value / getSetting(seqParam.getKey()).maxVal);
         }
-        y1 -= x1 / float(x2 - x1) * (y2 - y1);
-        y2 -= (x2 - laneWidth) / float(x2 - x1) * (y2 - y1);
         
-        line(laneX, laneBottom - y1, laneX + laneWidth, laneBottom - y2);
-        
+        temp.add(new KeyframeHandle(seqParam.getKey(), i, laneX + kfX, laneBottom - kfY, 
+          laneBottom - laneHeight + laneYPad, laneBottom - laneYPad));
       }
+      kfHandles.put(seqParam.getKey(), temp);
       
-      // draw visible keyframes
-      for (int j = firstVisibleKF; j < lastVisibleKF + 1; j++) {
-        int x1 = getTimelineX(keyframes.get(j).time);
-        int y1 = getTimelineY(keyframes.get(j).value / getSetting(seqParam.getKey()).maxVal);
-        
-        // keyframe dot
-        noStroke();
-        circle(laneX + x1, laneBottom - y1, 5);
-        
-        // line connecting to previous keyframe
-        stroke(uiKeyframe);
-        if (j > 0) {
-          int x0 = getTimelineX(keyframes.get(j - 1).time);
-          int y0 = getTimelineY(keyframes.get(j - 1).value / getSetting(seqParam.getKey()).maxVal);
-          // if previous keyframe is off-screen, truncate line
-          if (j == firstVisibleKF) {
-            y0 -= x0 / float(x1 - x0) * (y1 - y0);
-            x0 = 0;
-          }
-          line(laneX + x1, laneBottom - y1, laneX + x0, laneBottom - y0);
-        }
-          
-        // if final keyframe, extend flat line to end of timeline
-        if (j == keyframes.size() - 1) {
-          line(laneX + x1, laneBottom - y1, laneX + laneWidth, laneBottom - y1);
-        }
-        // if there is a further keyframe off-screen, extend toward it
-        else if (j == lastVisibleKF) {
-          int x2 = getTimelineX(keyframes.get(j + 1).time);
-          int y2 = getTimelineY(keyframes.get(j + 1).value / getSetting(seqParam.getKey()).maxVal);
-          y2 -= (x2 - laneWidth) / float(x1 - x2) * (y1 - y2);
-          x2 = laneWidth;
-          
-          line(laneX + x1, laneBottom - y1, laneX + x2, laneBottom - y2);
-        }
-      }
-      
-      // draw parameter name box
-      stroke(uiLightBorder);
-      strokeWeight(thickBorder);
-      fill(200 + (i % 2) * 10);
-      rect(xPos + 1, laneTop, nameBoxWidth - 1, laneHeight);
-      strokeWeight(1);
-      // name text
-      fill(uiTextBlack);
-      text(seqParam.getKey(), xPos + uiPadding, laneTop + 16);
-      
-      i++;
+      laneBottom += laneHeight;
     }
-  }
-  
-  void testClick() {
-    if (mouseX >= laneX + seekHandleX && mouseX <= laneX + seekHandleX + seekHandleWidth
-      && mouseY >= seekBarY && mouseY <= seekBarY + seekBarHeight) {
-      seekHandleActive = true;
-      dragStartX = mouseX;
-      handleStartX = seekHandleX;
-    }
-  }
-  
-  void doDrag() {
-    if (seekHandleActive) {
-      int maxPos = laneWidth - 8 - seekHandleWidth;
-      seekHandleX = min(max(handleStartX + mouseX - dragStartX, 0), maxPos);
-      seqDispStart = lerp(0, param("sequenceLength") - seqDispLen, seekHandleX / float(maxPos));
-    }
-  }
-  
-  void doRelease() {
-    seekHandleActive = false;
   }
   
   int getTimelineX(float time) {
@@ -224,5 +282,56 @@ class Timeline extends UIComponent {
   
   int getTimelineY(float value) {
     return int(value * (laneHeight - laneYPad * 2)) + laneYPad;
+  }
+}
+
+// ************************
+// KeyframeHandle
+// ************************
+class KeyframeHandle extends UIComponent {
+  String paramName;
+  int keyframeIndex;
+  int minY, maxY;
+  boolean active = false;
+  int radius = 5;
+  int dragStartY = 0, handleStartY = 0;
+  
+  KeyframeHandle(String p, int i, int x, int y, int miY, int maY) {
+    super(p + i, x, y);
+    paramName = p;
+    keyframeIndex = i;
+    minY = miY;
+    maxY = maY;
+  }
+  
+  void draw() {
+    if (active) {
+      stroke(uiLightBlue);
+    }
+    else {
+      stroke(kfColor);
+    }
+    circle(xPos, yPos, radius);
+  }
+  
+  void testClick() {
+    if (mouseX >= xPos - radius && mouseX <= xPos + radius
+      && mouseY >= yPos - radius && mouseY <= yPos + radius) {
+      active = true;
+      dragStartY = mouseY;
+      handleStartY = yPos;
+    }
+  }
+  
+  void doDrag() {
+    if (active) {
+      yPos = min(max(handleStartY + mouseY - dragStartY, minY), maxY);
+      float yPct = 1 - (yPos - minY) / float(maxY - minY);
+      sequenceParams.get(paramName).get(keyframeIndex).value = yPct * getSetting(paramName).maxVal;
+    }
+  }
+  
+  void doRelease() {
+    active = false;
   }
 }

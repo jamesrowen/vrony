@@ -8,7 +8,8 @@ int uiDarkGray = 210;
 int uiLightGray = 240;
 color uiLightBlue = color(117, 218, 255);
 color uiPanelBG = color(220, 250);
-color uiKeyframe = color(255, 0, 0);
+color kfColor = color(255, 0, 0);
+float kfStrokeWeight = 1.5;
 
 int uiTextSize = 12;
 int uiPadding = 5;
