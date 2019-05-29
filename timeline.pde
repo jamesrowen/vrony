@@ -311,57 +311,63 @@ class Timeline extends UIComponent {
   float getSeqVal(int screenY, int laneTop) {
     return 1 - (screenY - laneTop - laneYPad) / float(laneHeight - laneYPad * 2);
   }
-}
 
-// ************************
-// KeyframeHandle
-// ************************
-class KeyframeHandle extends UIComponent {
-  String paramName;
-  int keyframeIndex;
-  int minY, maxY;
-  boolean active = false;
-  int radius = 5;
-  int dragStartY = 0, handleStartY = 0;
-  
-  KeyframeHandle(String p, int i, int x, int y, int miY, int maY) {
-    super(p + i, x, y);
-    paramName = p;
-    keyframeIndex = i;
-    minY = miY;
-    maxY = maY;
-  }
-  
-  void draw() {
-    if (active) {
-      stroke(uiLightBlue);
+  // ************************
+  // KeyframeHandle
+  // ************************
+  class KeyframeHandle extends UIComponent {
+    String paramName;
+    int keyframeIndex;
+    int minY, maxY;
+    int radius = 5;
+    boolean active = false, dragMoved = false;
+    int dragStartY = 0, handleStartY = 0;
+    
+    KeyframeHandle(String p, int i, int x, int y, int miY, int maY) {
+      super(p + i, x, y);
+      paramName = p;
+      keyframeIndex = i;
+      minY = miY;
+      maxY = maY;
     }
-    else {
-      stroke(kfColor);
+    
+    void draw() {
+      if (active) {
+        stroke(uiLightBlue);
+      }
+      else {
+        stroke(kfColor);
+      }
+      circle(xPos, yPos, radius);
     }
-    circle(xPos, yPos, radius);
-  }
-  
-  boolean testClick() {
-    if (mouseX >= xPos - radius && mouseX <= xPos + radius
-      && mouseY >= yPos - radius && mouseY <= yPos + radius) {
-      active = true;
-      dragStartY = mouseY;
-      handleStartY = yPos;
-      return true;
+    
+    boolean testClick() {
+      if (mouseX >= xPos - radius && mouseX <= xPos + radius
+        && mouseY >= yPos - radius && mouseY <= yPos + radius) {
+        active = true;
+        dragMoved = false;
+        dragStartY = mouseY;
+        handleStartY = yPos;
+        return true;
+      }
+      return false;
     }
-    return false;
-  }
-  
-  void doDrag() {
-    if (active) {
-      yPos = min(max(handleStartY + mouseY - dragStartY, minY), maxY);
-      float yPct = 1 - (yPos - minY) / float(maxY - minY);
-      sequenceParams.get(paramName).get(keyframeIndex).value = yPct * getSetting(paramName).maxVal;
+    
+    void doDrag() {
+      if (active) {
+        dragMoved = true;
+        yPos = min(max(handleStartY + mouseY - dragStartY, minY), maxY);
+        float yPct = 1 - (yPos - minY) / float(maxY - minY);
+        sequenceParams.get(paramName).get(keyframeIndex).value = yPct * getSetting(paramName).maxVal;
+      }
     }
-  }
-  
-  void doRelease() {
-    active = false;
+    
+    void doRelease() {
+      if (active && !dragMoved) {
+        sequenceParams.get(paramName).remove(keyframeIndex);
+        Timeline.this.populateVisibleKeyframes();
+      }
+      active = false;
+    }
   }
 }

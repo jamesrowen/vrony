@@ -21,13 +21,14 @@ void setup() {
 }
 
 void draw() {
+  float tick = 0;
   if (setting("play") == 1) {
-    float tick = (millis() - lastMillis) / 1000.0;
-    if (setting("sequencer") == 1) {
-      tickSequence(tick);
-    }
-    animProgress += tick * log(param("speed") * ((float)Math.E - 1) + 1) * .5;
+    tick = (millis() - lastMillis) / 1000.0;
   }
+  if (setting("sequencer") == 1) {
+    tickSequence(tick);
+  }
+  animProgress += tick * log(param("speed") * ((float)Math.E - 1) + 1) * .5;
   lastMillis = millis();
   
   generatePoints();
