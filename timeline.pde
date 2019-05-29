@@ -27,6 +27,7 @@ class Timeline extends UIComponent {
   Timeline(String n, int x, int y) {
     super(n, x, y);
     seekBarY = yPos + 2;
+    seekHandleWidth = int(tlViewLength / param("sequenceLength") * laneWidth);
     gridLabelY = seekBarY + seekBarHeight;
     laneX = xPos + nameBoxWidth;
     laneYStart = yPos + laneYOff;
@@ -66,6 +67,13 @@ class Timeline extends UIComponent {
     stroke(uiLightBorder);
     rect(laneX, seekBarY, laneWidth - 1, seekBarHeight, 2);
     strokeWeight(1);
+    
+    // global position indicator
+    fill(80);
+    noStroke();
+    float seqProg = param("sequencePosition") / param("sequenceLength");
+    rect(laneX + seqProg * (laneWidth - 1), seekBarY + 2, 1, seekBarHeight - 3);
+    
     // seek handle
     fill(uiLightGray - 10);
     if (seekHandleActive) {
