@@ -14,7 +14,7 @@ int lastMillis = 0;
 float animProgress = 0;
   
 void setup() {
-  size(1200, 800);
+  size(1600, 800);
   setupSettings();
   setupSequencer();
   setupUI();

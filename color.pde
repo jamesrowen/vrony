@@ -1,5 +1,11 @@
 color[][] palettes = {
   {
+    #a8e6cf,
+    #dcedc1,
+    #ffd3b6,
+    #ffaaa5,
+    #ffb26b
+  }, {
     color(20, 171, 189),
     color(255, 170, 0),
     color(255, 56, 0),

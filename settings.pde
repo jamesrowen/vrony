@@ -33,7 +33,7 @@ void setupSettings() {
   
   // color
   settingsMap.put("colorMode", new Setting(1, 0, 2, 1, true));
-  settingsMap.put("palette", new Setting(1, 0, 2, 0, true));
+  settingsMap.put("palette", new Setting(1, 0, 3, 0, true));
   settingsMap.put("numColors", new Setting(1, 0, 4, 3, true));
   settingsMap.put("borderBrightness", new Setting(0, 0, 1, 0, true));
   settingsMap.put("borderBlack", new Setting(0, 0, 90, 45, true));
