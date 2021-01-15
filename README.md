@@ -1,6 +1,6 @@
 # vrony
 
-![vrony screenshot](https://user-images.githubusercontent.com/1694056/59143032-d2ac4a00-897b-11e9-8b02-1c458750ed68.png)
+![vrony screenshot](https://user-images.githubusercontent.com/1694056/104701062-f1cb9b80-56c9-11eb-8630-454eee269d8d.png)
 
 A Processing sketch for making animated Voronoi diagram patterns.
 
